@@ -21,6 +21,39 @@ AGun::AGun()
 void AGun::PullTrigger()
 {
 	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, Mesh, TEXT("MuzzleFlashSocket"));
+
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	if (OwnerPawn == nullptr) return;
+
+	AController* OwnerController = OwnerPawn->GetController();
+	if (OwnerController == nullptr) return;
+
+	FVector Location;
+	FRotator Rotation;
+
+	OwnerController->GetPlayerViewPoint(Location, Rotation);
+
+	FVector End = Location + Rotation.Vector() * MaxRange;
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+
+	Params.AddIgnoredActor(OwnerPawn);
+
+	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
+
+	if (bSuccess)
+	{
+		FVector ShotDirection = -Rotation.Vector();
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.Location, ShotDirection.Rotation());
+
+		AActor* HitActor = Hit.GetActor();
+
+		if (HitActor != nullptr)
+		{
+			FPointDamageEvent DamageEvent(Damage, Hit, ShotDirection, nullptr);
+			HitActor->TakeDamage(Damage, DamageEvent, OwnerController, this);
+		}
+	}
 }
 
 // Called when the game starts or when spawned

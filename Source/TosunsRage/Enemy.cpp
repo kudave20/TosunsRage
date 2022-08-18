@@ -2,6 +2,8 @@
 
 
 #include "Enemy.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -16,6 +18,7 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	Health = MaxHealth;
 }
 
 // Called every frame
@@ -30,5 +33,48 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	Health -= DamageToApply;
+
+	if (Health <= 0 && !IsDead)
+	{
+		Die();
+	}
+
+	return DamageToApply;
+}
+
+void AEnemy::Die()
+{
+	UE_LOG(LogTemp, Warning, TEXT("I'M DEAD"));
+
+	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
+	CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CapsuleComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	SetActorEnableCollision(true);
+
+	GetMesh()->SetAllBodiesSimulatePhysics(true);
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->WakeAllRigidBodies();
+	GetMesh()->bBlendPhysics = true;
+
+	UCharacterMovementComponent* CharacterComp = Cast<UCharacterMovementComponent>(GetMovementComponent());
+	if (CharacterComp != nullptr)
+	{
+		CharacterComp->StopMovementImmediately();
+		CharacterComp->DisableMovement();
+		CharacterComp->SetComponentTickEnabled(false);
+	}
+
+	SetLifeSpan(10.0f);
+
+	IsDead = true;
 }
 
