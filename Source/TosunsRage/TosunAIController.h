@@ -13,5 +13,10 @@ UCLASS()
 class TOSUNSRAGE_API ATosunAIController : public AAIController
 {
 	GENERATED_BODY()
-	
+public:
+	virtual void Tick(float DeltaSeconds) override;
+
+private:
+	UPROPERTY(EditAnywhere)
+	float AcceptanceRadius = 200;
 };
