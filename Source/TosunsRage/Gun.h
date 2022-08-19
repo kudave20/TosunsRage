@@ -32,11 +32,14 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* Mesh;
 
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* MuzzleFlash;
+	UPROPERTY(VisibleAnywhere)
+	class UPointLightComponent* Light;
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* Flame;
 
 	UPROPERTY(EditAnywhere)
-	UParticleSystem* ImpactEffect;
+	UMaterialInterface* BulletHole;
 
 	UPROPERTY(EditAnywhere)
 	float MaxRange = 1000;
