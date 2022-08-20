@@ -20,6 +20,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	UFUNCTION(BlueprintPure)
+	bool CheckIsAttacking();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -28,11 +31,19 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	void Attack();
+
+	void SetIsAttacking(bool bAttack);
+
 private:
 	UPROPERTY(EditDefaultsOnly)
 	float MaxHealth = 100;
+
 	UPROPERTY(VisibleAnywhere)
 	float Health;
+
+	UPROPERTY(EditAnywhere)
+	float Damage = 10;
 
 	UPROPERTY(EditAnywhere)
 	USoundBase* HitSound;
@@ -44,6 +55,7 @@ private:
 	USoundBase* KillVoice;
 
 	bool IsDead;
+	bool IsAttacking;
 
 	void Die();
 };

@@ -22,6 +22,11 @@ void AEnemy::BeginPlay()
 	Health = MaxHealth;
 }
 
+bool AEnemy::CheckIsAttacking()
+{
+	return IsAttacking;
+}
+
 // Called every frame
 void AEnemy::Tick(float DeltaTime)
 {
@@ -53,6 +58,41 @@ float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEv
 	}
 
 	return DamageToApply;
+}
+
+void AEnemy::Attack()
+{
+	IsAttacking = true;
+
+	FVector Location;
+	FRotator Rotation;
+
+	GetActorEyesViewPoint(Location, Rotation);
+
+	FVector End = Location + Rotation.Vector() * 100;
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+
+	Params.AddIgnoredActor(this);
+
+	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
+
+	if (bSuccess)
+	{
+		FVector ShotDirection = -Rotation.Vector();
+		AActor* HitActor = Hit.GetActor();
+
+		if (HitActor != nullptr)
+		{
+			FPointDamageEvent DamageEvent(Damage, Hit, ShotDirection, nullptr);
+			HitActor->TakeDamage(Damage, DamageEvent, GetController(), this);
+		}
+	}
+}
+
+void AEnemy::SetIsAttacking(bool bAttack)
+{
+	IsAttacking = bAttack;
 }
 
 void AEnemy::Die()

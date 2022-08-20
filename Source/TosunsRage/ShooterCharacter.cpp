@@ -87,6 +87,8 @@ void AShooterCharacter::Shoot()
 
 void AShooterCharacter::Die()
 {
-	// Die
+	UE_LOG(LogTemp, Warning, TEXT("I'M DEAD!"));
+
+	IsDead = true;
 }
 
