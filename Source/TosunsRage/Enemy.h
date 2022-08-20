@@ -34,7 +34,13 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	float Health;
 
-	float IsDead;
+	UPROPERTY(EditAnywhere)
+	USoundBase* KillSound;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* KillVoice;
+
+	bool IsDead;
 
 	void Die();
 };

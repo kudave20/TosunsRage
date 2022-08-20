@@ -4,6 +4,7 @@
 #include "Enemy.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -51,8 +52,7 @@ float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEv
 
 void AEnemy::Die()
 {
-	UE_LOG(LogTemp, Warning, TEXT("I'M DEAD"));
-
+	// Ragdoll
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
 	CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CapsuleComp->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -74,6 +74,14 @@ void AEnemy::Die()
 	}
 
 	SetLifeSpan(10.0f);
+
+	// Play UI Sound
+	UGameplayStatics::PlaySound2D(GetWorld(), KillSound);
+
+	if (FMath::RandBool())
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), KillVoice);
+	}
 
 	IsDead = true;
 }

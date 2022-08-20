@@ -16,6 +16,8 @@ AShooterCharacter::AShooterCharacter()
 void AShooterCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Health = MaxHealth;
 	
 	Gun = GetWorld()->SpawnActor<AGun>(GunClass);
 	Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
@@ -44,6 +46,20 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Shoot);
 }
 
+float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	Health -= DamageToApply;
+
+	if (Health <= 0 && !IsDead)
+	{
+		Die();
+	}
+
+	return DamageToApply;
+}
+
 void AShooterCharacter::MoveForward(float AxisValue)
 {
 	AddMovementInput(GetActorForwardVector() * AxisValue);
@@ -67,5 +83,10 @@ void AShooterCharacter::LookRightRate(float AxisValue)
 void AShooterCharacter::Shoot()
 {
 	Gun->PullTrigger();
+}
+
+void AShooterCharacter::Die()
+{
+	// Die
 }
 
