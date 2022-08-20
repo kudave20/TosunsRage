@@ -35,6 +35,9 @@ private:
 	float Health;
 
 	UPROPERTY(EditAnywhere)
+	USoundBase* HitSound;
+
+	UPROPERTY(EditAnywhere)
 	USoundBase* KillSound;
 
 	UPROPERTY(EditAnywhere)

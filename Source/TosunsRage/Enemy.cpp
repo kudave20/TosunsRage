@@ -42,6 +42,11 @@ float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEv
 
 	Health -= DamageToApply;
 
+	if (Health > 0)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), HitSound);
+	}
+
 	if (Health <= 0 && !IsDead)
 	{
 		Die();
