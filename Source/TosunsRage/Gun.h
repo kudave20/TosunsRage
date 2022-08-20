@@ -42,6 +42,9 @@ private:
 	UMaterialInterface* BulletHole;
 
 	UPROPERTY(EditAnywhere)
+	USoundBase* GunSound;
+
+	UPROPERTY(EditAnywhere)
 	float MaxRange = 1000;
 
 	UPROPERTY(EditAnywhere)

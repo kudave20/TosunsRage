@@ -28,6 +28,8 @@ AGun::AGun()
 
 void AGun::PullTrigger()
 {
+	UGameplayStatics::SpawnSoundAttached(GunSound, Mesh, TEXT("MuzzleFlashSocket"));
+
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr) return;
 
