@@ -2,14 +2,18 @@
 
 
 #include "TosunAIController.h"
-#include "Kismet/GameplayStatics.h"
+
+void ATosunAIController::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (AIBehavior != nullptr)
+    {
+        RunBehaviorTree(AIBehavior);
+    }
+}
 
 void ATosunAIController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
-
-    APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-
-    SetFocus(PlayerPawn);
-    MoveToActor(PlayerPawn, AcceptanceRadius);
 }
