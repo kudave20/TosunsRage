@@ -7,6 +7,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "ShooterCharacter.h"
 #include "TimerManager.h"
+#include "AIController.h"
+#include "BrainComponent.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -60,27 +62,27 @@ void AEnemy::Attack()
 {
 	IsAttacking = true;
 
-	FVector Location;
-	FRotator Rotation;
+	FVector Direction = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation() - GetActorLocation();
 
-	GetActorEyesViewPoint(Location, Rotation);
+	FVector Start = GetActorLocation();
+	FVector End = GetActorLocation() + Direction;
 
-	FVector End = Location + Rotation.Vector() * 100;
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+
 	FHitResult Hit;
-	FCollisionQueryParams Params;
 
-	Params.AddIgnoredActor(this);
-
-	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
+	bool bSuccess = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 25,
+		UEngineTypes::ConvertToTraceType(ECC_Camera), true, ActorsToIgnore,
+		EDrawDebugTrace::ForDuration, Hit, true);
 
 	if (bSuccess)
 	{
-		FVector ShotDirection = -Rotation.Vector();
 		AActor* HitActor = Hit.GetActor();
 
 		if (HitActor != nullptr)
 		{
-			FPointDamageEvent DamageEvent(Damage, Hit, ShotDirection, nullptr);
+			FPointDamageEvent DamageEvent(Damage, Hit, -Direction, nullptr);
 			HitActor->TakeDamage(Damage, DamageEvent, GetController(), this);
 		}
 	}
@@ -119,10 +121,13 @@ void AEnemy::Die()
 	// Play UI Sound
 	UGameplayStatics::PlaySound2D(GetWorld(), KillSound);
 
-	if (FMath::RandBool())
-	{
-		UGameplayStatics::PlaySound2D(GetWorld(), KillVoice);
-	}
+	if (FMath::RandBool()) UGameplayStatics::PlaySound2D(GetWorld(), KillVoice);
+
+	// Stop Behavior Tree
+	AAIController* AIController = Cast<AAIController>(GetOwner());
+	FString Reason;
+
+	if (AIController != nullptr) AIController->GetBrainComponent()->StopLogic(Reason);
 
 	IsDead = true;
 }
