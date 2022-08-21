@@ -5,6 +5,8 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "ShooterCharacter.h"
+#include "TimerManager.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -22,7 +24,7 @@ void AEnemy::BeginPlay()
 	Health = MaxHealth;
 }
 
-bool AEnemy::CheckIsAttacking()
+bool AEnemy::GetIsAttacking()
 {
 	return IsAttacking;
 }
@@ -47,15 +49,9 @@ float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEv
 
 	Health -= DamageToApply;
 
-	if (Health > 0)
-	{
-		UGameplayStatics::PlaySound2D(GetWorld(), HitSound);
-	}
+	if (Health > 0) UGameplayStatics::PlaySound2D(GetWorld(), HitSound);
 
-	if (Health <= 0 && !IsDead)
-	{
-		Die();
-	}
+	if (Health <= 0 && !IsDead) Die();
 
 	return DamageToApply;
 }
@@ -90,9 +86,9 @@ void AEnemy::Attack()
 	}
 }
 
-void AEnemy::SetIsAttacking(bool bAttack)
+void AEnemy::SetIsAttacking(bool bIsAttacking)
 {
-	IsAttacking = bAttack;
+	IsAttacking = bIsAttacking;
 }
 
 void AEnemy::Die()

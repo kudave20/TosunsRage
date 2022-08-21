@@ -3,6 +3,7 @@
 
 #include "ShooterCharacter.h"
 #include "Gun.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter()
@@ -22,6 +23,11 @@ void AShooterCharacter::BeginPlay()
 	Gun = GetWorld()->SpawnActor<AGun>(GunClass);
 	Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	Gun->SetOwner(this);
+}
+
+float AShooterCharacter::GetHealth() const
+{
+	return Health;
 }
 
 // Called every frame
@@ -52,10 +58,9 @@ float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent cons
 
 	Health -= DamageToApply;
 
-	if (Health <= 0 && !IsDead)
-	{
-		Die();
-	}
+	if (Health > 0) UGameplayStatics::PlaySound2D(GetWorld(), HurtSound);
+
+	if (Health <= 0 && !IsDead) Die();
 
 	return DamageToApply;
 }

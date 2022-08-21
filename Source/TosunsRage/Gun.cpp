@@ -6,6 +6,7 @@
 #include "Components/PointLightComponent.h"
 #include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "TimerManager.h"
 
 // Sets default values
 AGun::AGun()
@@ -68,7 +69,7 @@ void AGun::PullTrigger()
 
 	FTimerHandle WaitHandle;
 
-	GetWorld()->GetTimerManager().SetTimer(WaitHandle, [&]()
+	GetWorldTimerManager().SetTimer(WaitHandle, [&]()
 		{
 			Light->SetIntensity(0);
 			Flame->SetVisibility(false);

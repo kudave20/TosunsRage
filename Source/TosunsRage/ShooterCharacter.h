@@ -21,7 +21,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
+	UFUNCTION(BlueprintPure)
+	float GetHealth() const;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -41,6 +44,9 @@ private:
 	float Health;
 
 	bool IsDead;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* HurtSound;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AGun> GunClass;

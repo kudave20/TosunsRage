@@ -21,7 +21,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintPure)
-	bool CheckIsAttacking();
+	bool GetIsAttacking();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

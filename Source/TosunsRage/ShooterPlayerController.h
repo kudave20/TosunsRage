@@ -14,4 +14,12 @@ class TOSUNSRAGE_API AShooterPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> HUDClass;
+
+	UUserWidget* HUD;
 };
