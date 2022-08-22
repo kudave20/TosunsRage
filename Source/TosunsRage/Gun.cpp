@@ -7,6 +7,7 @@
 #include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
+#include "GameFramework/Character.h"
 
 // Sets default values
 AGun::AGun()
@@ -27,10 +28,33 @@ AGun::AGun()
 	Flame->SetupAttachment(Root);
 }
 
+// Called when the game starts or when spawned
+void AGun::BeginPlay()
+{
+	Super::BeginPlay();
+
+	Ammo = MaxAmmo;
+}
+
+int32 AGun::GetMaxAmmo() const
+{
+	return MaxAmmo;
+}
+
+int32 AGun::GetAmmo() const
+{
+	return Ammo;
+}
+
+// Called every frame
+void AGun::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
 void AGun::PullTrigger()
 {
-	UGameplayStatics::SpawnSoundAttached(GunSound, Mesh, TEXT("MuzzleFlashSocket"));
-
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr) return;
 
@@ -41,6 +65,16 @@ void AGun::PullTrigger()
 	FRotator Rotation;
 
 	OwnerController->GetPlayerViewPoint(Location, Rotation);
+
+	if (Ammo == 0)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DrySound, Location);
+		return;
+	}
+	
+	Ammo--;
+
+	UGameplayStatics::SpawnSoundAttached(GunSound, Mesh, TEXT("MuzzleFlashSocket"));
 
 	FVector End = Location + Rotation.Vector() * MaxRange;
 	FHitResult Hit;
@@ -91,17 +125,24 @@ void AGun::PullTrigger()
 	Decal->FadeDuration = 5;
 }
 
-// Called when the game starts or when spawned
-void AGun::BeginPlay()
+void AGun::Reload()
 {
-	Super::BeginPlay();
-	
-}
+	if (Ammo == MaxAmmo) return;
 
-// Called every frame
-void AGun::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (OwnerCharacter == nullptr) return;
 
+	UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance();
+	if (AnimInstance == nullptr) return;
+
+	float ReloadTime = AnimInstance->Montage_Play(ArmsReloadAnim);
+	Mesh->PlayAnimation(GunReloadAnim, false);
+
+	FTimerHandle WaitHandle;
+
+	GetWorldTimerManager().SetTimer(WaitHandle, [&]()
+		{
+			Ammo = MaxAmmo;
+		}, ReloadTime, false);
 }
 

@@ -25,6 +25,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	float GetHealth() const;
 
+	UFUNCTION(BlueprintPure)
+	AGun* GetGun() const;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -60,4 +63,5 @@ private:
 	void LookRightRate(float AxisValue);
 	void Shoot();
 	void Die();
+	void Reload();
 };

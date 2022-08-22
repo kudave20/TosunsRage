@@ -15,15 +15,23 @@ public:
 	// Sets default values for this actor's properties
 	AGun();
 
-	void PullTrigger();
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
+	UFUNCTION(BlueprintPure)
+	int32 GetMaxAmmo() const;
+
+	UFUNCTION(BlueprintPure)
+	int32 GetAmmo() const;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void PullTrigger();
+
+	void Reload();
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -41,12 +49,27 @@ private:
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* BulletHole;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly)
 	USoundBase* GunSound;
+
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* DrySound;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* ArmsReloadAnim;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* GunReloadAnim;
 
 	UPROPERTY(EditAnywhere)
 	float MaxRange = 1000;
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 10;
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 MaxAmmo;
+
+	UPROPERTY(VisibleAnywhere)
+	int32 Ammo;
 };

@@ -95,6 +95,8 @@ void AEnemy::SetIsAttacking(bool bIsAttacking)
 
 void AEnemy::Die()
 {
+	DetachFromControllerPendingDestroy();
+
 	// Ragdoll
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
 	CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -123,11 +125,12 @@ void AEnemy::Die()
 
 	if (FMath::RandBool()) UGameplayStatics::PlaySound2D(GetWorld(), KillVoice);
 
-	// Stop Behavior Tree
+	/*
 	AAIController* AIController = Cast<AAIController>(GetOwner());
 	FString Reason;
 
 	if (AIController != nullptr) AIController->GetBrainComponent()->StopLogic(Reason);
+	*/
 
 	IsDead = true;
 }

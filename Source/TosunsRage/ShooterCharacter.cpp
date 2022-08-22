@@ -30,6 +30,11 @@ float AShooterCharacter::GetHealth() const
 	return Health;
 }
 
+AGun* AShooterCharacter::GetGun() const
+{
+	return Gun;
+}
+
 // Called every frame
 void AShooterCharacter::Tick(float DeltaTime)
 {
@@ -50,6 +55,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis(TEXT("LookRightRate"), this, &AShooterCharacter::LookRightRate);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Shoot);
+	PlayerInputComponent->BindAction(TEXT("Reload"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Reload);
 }
 
 float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
@@ -95,5 +101,10 @@ void AShooterCharacter::Die()
 	UE_LOG(LogTemp, Warning, TEXT("I'M DEAD!"));
 
 	IsDead = true;
+}
+
+void AShooterCharacter::Reload()
+{
+	Gun->Reload();
 }
 
