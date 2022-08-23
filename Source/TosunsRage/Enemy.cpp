@@ -78,12 +78,12 @@ void AEnemy::Attack()
 
 	if (bSuccess)
 	{
-		AActor* HitActor = Hit.GetActor();
+		AShooterCharacter* Player = Cast<AShooterCharacter>(Hit.GetActor());
 
-		if (HitActor != nullptr)
+		if (Player != nullptr)
 		{
 			FPointDamageEvent DamageEvent(Damage, Hit, -Direction, nullptr);
-			HitActor->TakeDamage(Damage, DamageEvent, GetController(), this);
+			Player->TakeDamage(Damage, DamageEvent, GetController(), this);
 		}
 	}
 }

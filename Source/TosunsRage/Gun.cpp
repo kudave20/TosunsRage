@@ -46,6 +46,11 @@ int32 AGun::GetAmmo() const
 	return Ammo;
 }
 
+EGunType AGun::GetGunType() const
+{
+	return GunType;
+}
+
 // Called every frame
 void AGun::Tick(float DeltaTime)
 {
@@ -55,6 +60,8 @@ void AGun::Tick(float DeltaTime)
 
 void AGun::PullTrigger()
 {
+	if (IsReloading) return;
+
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());
 	if (OwnerPawn == nullptr) return;
 
@@ -107,16 +114,8 @@ void AGun::PullTrigger()
 		{
 			Light->SetIntensity(0);
 			Flame->SetVisibility(false);
+			SetNextFlame();
 		}, 0.1f, false);
-
-	float RandomFloat = FMath::RandRange(-90.f, 90.f);
-	FRotator NewRotation(90);
-	NewRotation.Pitch += RandomFloat;
-
-	Flame->SetRelativeRotation(NewRotation);
-
-	RandomFloat = FMath::RandRange(0.2f, 0.3f);
-	Flame->SetWorldScale3D(FVector(RandomFloat));
 
 	// Spawn Bullet Decal
 	UDecalComponent* Decal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), BulletHole, FVector(3.2f, 6.4f, 6.4f), Hit.Location, Hit.ImpactPoint.Rotation());
@@ -129,13 +128,12 @@ void AGun::Reload()
 {
 	if (Ammo == MaxAmmo) return;
 
+	IsReloading = true;
+
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 	if (OwnerCharacter == nullptr) return;
 
-	UAnimInstance* AnimInstance = OwnerCharacter->GetMesh()->GetAnimInstance();
-	if (AnimInstance == nullptr) return;
-
-	float ReloadTime = AnimInstance->Montage_Play(ArmsReloadAnim);
+	float ReloadTime = OwnerCharacter->PlayAnimMontage(ArmsReloadAnim);
 	Mesh->PlayAnimation(GunReloadAnim, false);
 
 	FTimerHandle WaitHandle;
@@ -143,6 +141,19 @@ void AGun::Reload()
 	GetWorldTimerManager().SetTimer(WaitHandle, [&]()
 		{
 			Ammo = MaxAmmo;
+			IsReloading = false;
 		}, ReloadTime, false);
+}
+
+void AGun::SetNextFlame()
+{
+	float RandomFloat = FMath::RandRange(-90.f, 90.f);
+	FRotator NewRotation(90);
+	NewRotation.Pitch += RandomFloat;
+
+	Flame->SetRelativeRotation(NewRotation);
+
+	RandomFloat = FMath::RandRange(0.2f, 0.3f);
+	Flame->SetWorldScale3D(FVector(RandomFloat));
 }
 

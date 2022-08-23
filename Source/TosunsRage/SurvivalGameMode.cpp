@@ -25,9 +25,9 @@ void ASurvivalGameMode::SpawnTosun()
 	FVector Location(-130, -260, 691);
 	FRotator Rotation;
 
-	GetWorld()->SpawnActor<ACharacter>(Tosun, Location, Rotation);
+	GetWorld()->SpawnActor<AActor>(Tosun, Location, Rotation);
 
 	Location.Z = 256;
 
-	GetWorld()->SpawnActor<ACharacter>(Tosun, Location, Rotation);
+	GetWorld()->SpawnActor<AActor>(Tosun, Location, Rotation);
 }

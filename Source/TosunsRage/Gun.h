@@ -6,12 +6,20 @@
 #include "GameFramework/Actor.h"
 #include "Gun.generated.h"
 
+UENUM(BlueprintType)
+enum class EGunType : uint8
+{
+	GLOCK26 UMETA(DisplayName = "GLOCK26"),
+	MP5 UMETA(DisplayName = "MP5"),
+	AK74 UMETA(DisplayName = "AK74"),
+};
+
 UCLASS()
 class TOSUNSRAGE_API AGun : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AGun();
 
@@ -25,6 +33,9 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	int32 GetAmmo() const;
+
+	UFUNCTION(BlueprintPure)
+	EGunType GetGunType() const;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -62,7 +73,7 @@ private:
 	UAnimMontage* GunReloadAnim;
 
 	UPROPERTY(EditAnywhere)
-	float MaxRange = 1000;
+	float MaxRange = 100000;
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 10;
@@ -72,4 +83,11 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	int32 Ammo;
+
+	UPROPERTY(EditDefaultsOnly)
+	EGunType GunType;
+
+	bool IsReloading;
+
+	void SetNextFlame();
 };
