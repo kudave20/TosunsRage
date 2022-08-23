@@ -125,13 +125,6 @@ void AEnemy::Die()
 
 	if (FMath::RandBool()) UGameplayStatics::PlaySound2D(GetWorld(), KillVoice);
 
-	/*
-	AAIController* AIController = Cast<AAIController>(GetOwner());
-	FString Reason;
-
-	if (AIController != nullptr) AIController->GetBrainComponent()->StopLogic(Reason);
-	*/
-
 	IsDead = true;
 }
 

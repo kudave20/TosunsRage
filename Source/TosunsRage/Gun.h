@@ -44,6 +44,8 @@ public:
 
 	void Reload();
 
+	void Aim();
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* Root;
@@ -88,6 +90,7 @@ private:
 	EGunType GunType;
 
 	bool IsReloading;
+	bool IsAiming;
 
 	void SetNextFlame();
 };

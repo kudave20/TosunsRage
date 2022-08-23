@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Components/TimelineComponent.h"
 #include "ShooterCharacter.generated.h"
 
 class AGun;
@@ -26,6 +27,9 @@ public:
 	float GetHealth() const;
 
 	UFUNCTION(BlueprintPure)
+	bool GetIsAiming() const;
+
+	UFUNCTION(BlueprintPure)
 	AGun* GetGun() const;
 
 	// Called every frame
@@ -36,9 +40,17 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
+	float PlayArmsAnimMontage(UAnimMontage* ArmsAnimMontage);
+
 private:
+	UPROPERTY(VisibleAnywhere)
+	class UCameraComponent* Camera;
+
+	UPROPERTY(VisibleAnywhere)
+	USkeletalMeshComponent* Arms;
+
 	UPROPERTY(EditAnywhere)
-	float RotationRate = 10;
+	float RotationRate = 70;
 
 	UPROPERTY(EditDefaultsOnly)
 	float MaxHealth = 100;
@@ -47,6 +59,8 @@ private:
 	float Health;
 
 	bool IsDead;
+
+	bool IsAiming;
 
 	UPROPERTY(EditAnywhere)
 	USoundBase* HurtSound;
@@ -57,11 +71,24 @@ private:
 	UPROPERTY()
 	AGun* Gun;
 
+	UPROPERTY(EditDefaultsOnly)
+	UCurveFloat* AimCurveFloat;
+
+	FTimeline AimTimeLine;
+
 	void MoveForward(float AxisValue);
 	void MoveRight(float AxisValue);
 	void LookUpRate(float AxisValue);
 	void LookRightRate(float AxisValue);
+
 	void Shoot();
 	void Die();
+
 	void Reload();
+	void Aim();
+
+	void AimTimeLineSet();
+
+	UFUNCTION()
+	void SetAimLocation(float Value);
 };

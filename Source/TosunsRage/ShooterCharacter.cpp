@@ -3,6 +3,9 @@
 
 #include "ShooterCharacter.h"
 #include "Gun.h"
+#include "Components/TimelineComponent.h"
+#include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -11,6 +14,11 @@ AShooterCharacter::AShooterCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Camera->SetupAttachment(GetCapsuleComponent());
+
+	Arms = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Arms"));
+	Arms->SetupAttachment(Camera);
 }
 
 // Called when the game starts or when spawned
@@ -21,13 +29,18 @@ void AShooterCharacter::BeginPlay()
 	Health = MaxHealth;
 	
 	Gun = GetWorld()->SpawnActor<AGun>(GunClass);
-	Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
+	Gun->AttachToComponent(Arms, FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 	Gun->SetOwner(this);
 }
 
 float AShooterCharacter::GetHealth() const
 {
 	return Health;
+}
+
+bool AShooterCharacter::GetIsAiming() const
+{
+	return IsAiming;
 }
 
 AGun* AShooterCharacter::GetGun() const
@@ -40,6 +53,7 @@ void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	AimTimeLine.TickTimeline(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -56,6 +70,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Shoot);
 	PlayerInputComponent->BindAction(TEXT("Reload"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Reload);
+	PlayerInputComponent->BindAction(TEXT("Aim"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Aim);
 }
 
 float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
@@ -69,6 +84,19 @@ float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent cons
 	if (Health <= 0 && !IsDead) Die();
 
 	return DamageToApply;
+}
+
+float AShooterCharacter::PlayArmsAnimMontage(UAnimMontage* ArmsAnimMontage)
+{
+	UAnimInstance* AnimInstance = Arms->GetAnimInstance();
+
+	if (AnimInstance != nullptr)
+	{
+		float ReloadTime = AnimInstance->Montage_Play(ArmsAnimMontage);
+		return ReloadTime;
+	}
+	
+	return 0;
 }
 
 void AShooterCharacter::MoveForward(float AxisValue)
@@ -108,3 +136,44 @@ void AShooterCharacter::Reload()
 	Gun->Reload();
 }
 
+void AShooterCharacter::Aim()
+{
+	AimTimeLineSet();
+}
+
+void AShooterCharacter::AimTimeLineSet()
+{
+	if (AimCurveFloat != nullptr)
+	{
+		FOnTimelineFloat TimeLineCallback;
+		FOnTimelineEventStatic TimeLineFinishedCallback;
+
+		TimeLineCallback.BindUFunction(this, FName("SetAimLocation"));
+		TimeLineFinishedCallback.BindUFunction(this, FName("SetADSLocation"));
+
+		AimTimeLine.AddInterpFloat(AimCurveFloat, TimeLineCallback);
+		AimTimeLine.SetTimelineFinishedFunc(TimeLineFinishedCallback);
+
+		if (IsAiming)
+		{
+			AimTimeLine.Reverse();
+
+			IsAiming = false;
+		}
+		else
+		{
+			AimTimeLine.PlayFromStart();
+
+			Arms->SetRelativeRotation(FRotator(0, -1.06f, 0).Quaternion());
+
+			IsAiming = true;
+		}
+	}
+}
+
+void AShooterCharacter::SetAimLocation(float Value)
+{
+	FVector NewArmLocation = FMath::Lerp<FVector, float>(FVector(1.6f, 7.8f, -23.6775f), FVector(-8, 0, -16), Value);
+
+	Arms->SetRelativeLocation(NewArmLocation);
+}

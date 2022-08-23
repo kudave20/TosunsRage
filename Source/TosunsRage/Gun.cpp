@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 #include "GameFramework/Character.h"
+#include "ShooterCharacter.h"
 
 // Sets default values
 AGun::AGun()
@@ -88,6 +89,7 @@ void AGun::PullTrigger()
 	FCollisionQueryParams Params;
 
 	Params.AddIgnoredActor(OwnerPawn);
+	Params.AddIgnoredActor(this);
 
 	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
 
@@ -130,10 +132,10 @@ void AGun::Reload()
 
 	IsReloading = true;
 
-	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	AShooterCharacter* OwnerCharacter = Cast<AShooterCharacter>(GetOwner());
 	if (OwnerCharacter == nullptr) return;
 
-	float ReloadTime = OwnerCharacter->PlayAnimMontage(ArmsReloadAnim);
+	float ReloadTime = OwnerCharacter->PlayArmsAnimMontage(ArmsReloadAnim);
 	Mesh->PlayAnimation(GunReloadAnim, false);
 
 	FTimerHandle WaitHandle;
@@ -143,6 +145,13 @@ void AGun::Reload()
 			Ammo = MaxAmmo;
 			IsReloading = false;
 		}, ReloadTime, false);
+}
+
+void AGun::Aim()
+{
+	if (IsReloading) return;
+
+	IsAiming = true;
 }
 
 void AGun::SetNextFlame()
