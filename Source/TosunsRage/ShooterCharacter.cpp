@@ -105,6 +105,9 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("Reload"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Reload);
 	PlayerInputComponent->BindAction(TEXT("Aim"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Aim);
 	PlayerInputComponent->BindAction(TEXT("Drop"), EInputEvent::IE_Pressed, this, &AShooterCharacter::UnEquip);
+	PlayerInputComponent->BindAction(TEXT("Switch"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Switch);
+	PlayerInputComponent->BindAction(TEXT("EquipPrimary"), EInputEvent::IE_Pressed, this, &AShooterCharacter::EquipPrimary);
+	PlayerInputComponent->BindAction(TEXT("EquipSecondary"), EInputEvent::IE_Pressed, this, &AShooterCharacter::EquipSecondary);
 }
 
 float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
@@ -142,75 +145,23 @@ void AShooterCharacter::Equip(EGunSlot GunSlot, EGunType GunType, TSubclassOf<AG
 			PrimaryGun->AttachToComponent(Arms, FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 			PrimaryGun->SetOwner(this);
 			PrimaryGunType = GunType;
+
+			if (SecondaryGun != nullptr) SecondaryGun->GetMesh()->SetVisibility(false);
+
 			break;
 		case EGunSlot::SECONDARY:
 			SecondaryGun = GetWorld()->SpawnActor<AGun>(GunClass);
 			SecondaryGun->AttachToComponent(Arms, FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
 			SecondaryGun->SetOwner(this);
 			SecondaryGunType = GunType;
+
+			if (PrimaryGun != nullptr) PrimaryGun->GetMesh()->SetVisibility(false);
+
 			break;
 	}
 
 	EquippedGunSlot = GunSlot;
 	Arms->SetVisibility(true);
-}
-
-void AShooterCharacter::MoveForward(float AxisValue)
-{
-	AddMovementInput(GetActorForwardVector() * AxisValue);
-}
-
-void AShooterCharacter::MoveRight(float AxisValue)
-{
-	AddMovementInput(GetActorRightVector() * AxisValue);
-}
-
-void AShooterCharacter::LookUpRate(float AxisValue)
-{
-	AddControllerPitchInput(AxisValue * RotationRate * GetWorld()->GetDeltaSeconds());
-}
-
-void AShooterCharacter::LookRightRate(float AxisValue)
-{
-	AddControllerYawInput(AxisValue * RotationRate * GetWorld()->GetDeltaSeconds());
-}
-
-void AShooterCharacter::Shoot()
-{
-	switch (EquippedGunSlot)
-	{
-		case EGunSlot::PRIMARY:
-			PrimaryGun->PullTrigger();
-			break;
-		case EGunSlot::SECONDARY:
-			SecondaryGun->PullTrigger();
-			break;
-	}
-}
-
-void AShooterCharacter::Die()
-{
-	UE_LOG(LogTemp, Warning, TEXT("I'M DEAD!"));
-
-	IsDead = true;
-}
-
-void AShooterCharacter::Reload()
-{
-	switch (EquippedGunSlot)
-	{
-		case EGunSlot::PRIMARY:
-			PrimaryGun->Reload();
-			break;
-		case EGunSlot::SECONDARY:
-			SecondaryGun->Reload();
-			break;
-	}
-}
-
-void AShooterCharacter::Aim()
-{
-	AimTimeLineSet();
 }
 
 void AShooterCharacter::AimTimeLineSet()
@@ -243,6 +194,64 @@ void AShooterCharacter::AimTimeLineSet()
 	}
 }
 
+void AShooterCharacter::MoveForward(float AxisValue)
+{
+	AddMovementInput(GetActorForwardVector() * AxisValue);
+}
+
+void AShooterCharacter::MoveRight(float AxisValue)
+{
+	AddMovementInput(GetActorRightVector() * AxisValue);
+}
+
+void AShooterCharacter::LookUpRate(float AxisValue)
+{
+	AddControllerPitchInput(AxisValue * RotationRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AShooterCharacter::LookRightRate(float AxisValue)
+{
+	AddControllerYawInput(AxisValue * RotationRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AShooterCharacter::Shoot()
+{
+	switch (EquippedGunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			if (PrimaryGun != nullptr) PrimaryGun->PullTrigger();
+			break;
+		case EGunSlot::SECONDARY:
+			if (SecondaryGun != nullptr) SecondaryGun->PullTrigger();
+			break;
+	}
+}
+
+void AShooterCharacter::Die()
+{
+	UE_LOG(LogTemp, Warning, TEXT("I'M DEAD!"));
+
+	IsDead = true;
+}
+
+void AShooterCharacter::Reload()
+{
+	switch (EquippedGunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			PrimaryGun->Reload();
+			break;
+		case EGunSlot::SECONDARY:
+			SecondaryGun->Reload();
+			break;
+	}
+}
+
+void AShooterCharacter::Aim()
+{
+	AimTimeLineSet();
+}
+
 void AShooterCharacter::SetAimLocation(float Value)
 {
 	FVector NewArmLocation = FMath::Lerp<FVector, float>(FVector(1.6f, 7.8f, -23.6775f), FVector(-8, 0, -16), Value);
@@ -255,21 +264,87 @@ void AShooterCharacter::SetAimLocation(float Value)
 	}
 }
 
+void AShooterCharacter::EquipPrimary()
+{
+	if (EquippedGunSlot == EGunSlot::PRIMARY) return;
+
+	if (SecondaryGun != nullptr) SecondaryGun->GetMesh()->SetVisibility(false);
+
+	if (PrimaryGun == nullptr) Arms->SetVisibility(false);
+	else
+	{
+		Arms->SetVisibility(true);
+		PrimaryGun->GetMesh()->SetVisibility(true);
+	}
+
+	EquippedGunSlot = EGunSlot::PRIMARY;
+}
+
+void AShooterCharacter::EquipSecondary()
+{
+	if (EquippedGunSlot == EGunSlot::SECONDARY) return;
+
+	if (PrimaryGun != nullptr) PrimaryGun->GetMesh()->SetVisibility(false);
+
+	if (SecondaryGun == nullptr) Arms->SetVisibility(false);
+	else
+	{
+		Arms->SetVisibility(true);
+		SecondaryGun->GetMesh()->SetVisibility(true);
+	}
+
+	EquippedGunSlot = EGunSlot::SECONDARY;
+}
+
+void AShooterCharacter::Switch()
+{
+	switch (EquippedGunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			if (SecondaryGun == nullptr) return;
+
+			if (PrimaryGun != nullptr) PrimaryGun->GetMesh()->SetVisibility(false);
+			
+			Arms->SetVisibility(true);
+			SecondaryGun->GetMesh()->SetVisibility(true);
+			
+			EquippedGunSlot = EGunSlot::SECONDARY;
+			
+			break;
+		case EGunSlot::SECONDARY:
+			if (PrimaryGun == nullptr) return;
+
+			if (SecondaryGun != nullptr) SecondaryGun->GetMesh()->SetVisibility(false);
+			Arms->SetVisibility(true);
+			PrimaryGun->GetMesh()->SetVisibility(true);
+
+			EquippedGunSlot = EGunSlot::PRIMARY;
+
+			break;
+	}
+}
+
 void AShooterCharacter::UnEquip()
 {
+	if (IsReloading) return;
+
 	switch (EquippedGunSlot)
 	{
 		case EGunSlot::PRIMARY:
 			PrimaryGun->SetMaxAmmo(0);
 			PrimaryGun->GetMesh()->SetVisibility(false);
+			PrimaryGun = nullptr;
 			PrimaryGunType = EGunType::NONE;
 			break;
 		case EGunSlot::SECONDARY:
 			SecondaryGun->SetMaxAmmo(0);
 			SecondaryGun->GetMesh()->SetVisibility(false);
+			SecondaryGun = nullptr;
 			SecondaryGunType = EGunType::NONE;
 			break;
 	}
 
 	Arms->SetVisibility(false);
+
+	IsAiming = false;
 }

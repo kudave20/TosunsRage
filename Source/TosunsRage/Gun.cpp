@@ -9,6 +9,7 @@
 #include "TimerManager.h"
 #include "GameFramework/Character.h"
 #include "ShooterCharacter.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 AGun::AGun()
@@ -141,6 +142,8 @@ void AGun::Reload()
 
 	OwnerCharacter->SetIsReloading(true);
 
+	if (OwnerCharacter->GetIsAiming()) OwnerCharacter->AimTimeLineSet();
+
 	float ReloadTime = OwnerCharacter->PlayArmsAnimMontage(ArmsReloadAnim);
 	Mesh->PlayAnimation(GunReloadAnim, false);
 
@@ -155,16 +158,6 @@ void AGun::Reload()
 
 			OwnerCharacter->SetIsReloading(false);
 		}, ReloadTime, false);
-}
-
-void AGun::Aim()
-{
-	AShooterCharacter* OwnerCharacter = Cast<AShooterCharacter>(GetOwner());
-	if (OwnerCharacter == nullptr) return;
-
-	if (OwnerCharacter->GetIsReloading()) return;
-
-	OwnerCharacter->SetIsAiming(true);
 }
 
 void AGun::SetNextFlame()

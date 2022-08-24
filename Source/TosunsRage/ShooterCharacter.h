@@ -60,6 +60,8 @@ public:
 
 	void Equip(EGunSlot GunSlot, EGunType GunType, TSubclassOf<AGun> GunClass);
 
+	void AimTimeLineSet();
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* Camera;
@@ -111,10 +113,13 @@ private:
 	void Reload();
 	void Aim();
 
-	void AimTimeLineSet();
-
 	UFUNCTION()
 	void SetAimLocation(float Value);
+
+	void EquipPrimary();
+	void EquipSecondary();
+
+	void Switch();
 
 	void UnEquip();
 };

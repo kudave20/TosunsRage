@@ -46,8 +46,6 @@ public:
 
 	void Reload();
 
-	void Aim();
-
 private:
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* Root;
