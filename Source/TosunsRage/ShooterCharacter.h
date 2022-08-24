@@ -7,6 +7,13 @@
 #include "Components/TimelineComponent.h"
 #include "ShooterCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EGunSlot : uint8
+{
+	PRIMARY UMETA(DisplayName = "PRIMARY"),
+	SECONDARY UMETA(DisplayName = "SECONDARY"),
+};
+
 class AGun;
 
 UCLASS()
@@ -29,8 +36,17 @@ public:
 	UFUNCTION(BlueprintPure)
 	bool GetIsAiming() const;
 
+	bool GetIsReloading() const;
+
 	UFUNCTION(BlueprintPure)
 	AGun* GetGun() const;
+
+	UFUNCTION(BlueprintPure)
+	EGunType GetGunType() const;
+
+	void SetIsReloading(bool bIsReloading);
+
+	void SetIsAiming(bool bIsAiming);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -41,6 +57,8 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	float PlayArmsAnimMontage(UAnimMontage* ArmsAnimMontage);
+
+	void Equip(EGunSlot GunSlot, EGunType GunType, TSubclassOf<AGun> GunClass);
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -61,15 +79,21 @@ private:
 	bool IsDead;
 
 	bool IsAiming;
+	bool IsReloading;
 
 	UPROPERTY(EditAnywhere)
 	USoundBase* HurtSound;
 
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AGun> GunClass;
+	UPROPERTY()
+	AGun* PrimaryGun;
 
 	UPROPERTY()
-	AGun* Gun;
+	AGun* SecondaryGun;
+
+	EGunType PrimaryGunType;
+	EGunType SecondaryGunType;
+
+	EGunSlot EquippedGunSlot;
 
 	UPROPERTY(EditDefaultsOnly)
 	UCurveFloat* AimCurveFloat;
@@ -91,4 +115,6 @@ private:
 
 	UFUNCTION()
 	void SetAimLocation(float Value);
+
+	void UnEquip();
 };

@@ -19,6 +19,7 @@ AShooterCharacter::AShooterCharacter()
 
 	Arms = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Arms"));
 	Arms->SetupAttachment(Camera);
+	Arms->SetVisibility(false);
 }
 
 // Called when the game starts or when spawned
@@ -27,10 +28,6 @@ void AShooterCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	Health = MaxHealth;
-	
-	Gun = GetWorld()->SpawnActor<AGun>(GunClass);
-	Gun->AttachToComponent(Arms, FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
-	Gun->SetOwner(this);
 }
 
 float AShooterCharacter::GetHealth() const
@@ -43,9 +40,45 @@ bool AShooterCharacter::GetIsAiming() const
 	return IsAiming;
 }
 
+bool AShooterCharacter::GetIsReloading() const
+{
+	return IsReloading;
+}
+
 AGun* AShooterCharacter::GetGun() const
 {
-	return Gun;
+	switch (EquippedGunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			return PrimaryGun;
+		case EGunSlot::SECONDARY:
+			return SecondaryGun;
+	}
+
+	return nullptr;
+}
+
+EGunType AShooterCharacter::GetGunType() const
+{
+	switch (EquippedGunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			return PrimaryGunType;
+		case EGunSlot::SECONDARY:
+			return SecondaryGunType;
+	}
+
+	return EGunType::NONE;
+}
+
+void AShooterCharacter::SetIsReloading(bool bIsReloading)
+{
+	IsReloading = bIsReloading;
+}
+
+void AShooterCharacter::SetIsAiming(bool bIsAiming)
+{
+	IsAiming = bIsAiming;
 }
 
 // Called every frame
@@ -71,6 +104,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Shoot);
 	PlayerInputComponent->BindAction(TEXT("Reload"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Reload);
 	PlayerInputComponent->BindAction(TEXT("Aim"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Aim);
+	PlayerInputComponent->BindAction(TEXT("Drop"), EInputEvent::IE_Pressed, this, &AShooterCharacter::UnEquip);
 }
 
 float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
@@ -99,6 +133,28 @@ float AShooterCharacter::PlayArmsAnimMontage(UAnimMontage* ArmsAnimMontage)
 	return 0;
 }
 
+void AShooterCharacter::Equip(EGunSlot GunSlot, EGunType GunType, TSubclassOf<AGun> GunClass)
+{
+	switch (GunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			PrimaryGun = GetWorld()->SpawnActor<AGun>(GunClass);
+			PrimaryGun->AttachToComponent(Arms, FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
+			PrimaryGun->SetOwner(this);
+			PrimaryGunType = GunType;
+			break;
+		case EGunSlot::SECONDARY:
+			SecondaryGun = GetWorld()->SpawnActor<AGun>(GunClass);
+			SecondaryGun->AttachToComponent(Arms, FAttachmentTransformRules::KeepRelativeTransform, TEXT("WeaponSocket"));
+			SecondaryGun->SetOwner(this);
+			SecondaryGunType = GunType;
+			break;
+	}
+
+	EquippedGunSlot = GunSlot;
+	Arms->SetVisibility(true);
+}
+
 void AShooterCharacter::MoveForward(float AxisValue)
 {
 	AddMovementInput(GetActorForwardVector() * AxisValue);
@@ -121,7 +177,15 @@ void AShooterCharacter::LookRightRate(float AxisValue)
 
 void AShooterCharacter::Shoot()
 {
-	Gun->PullTrigger();
+	switch (EquippedGunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			PrimaryGun->PullTrigger();
+			break;
+		case EGunSlot::SECONDARY:
+			SecondaryGun->PullTrigger();
+			break;
+	}
 }
 
 void AShooterCharacter::Die()
@@ -133,7 +197,15 @@ void AShooterCharacter::Die()
 
 void AShooterCharacter::Reload()
 {
-	Gun->Reload();
+	switch (EquippedGunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			PrimaryGun->Reload();
+			break;
+		case EGunSlot::SECONDARY:
+			SecondaryGun->Reload();
+			break;
+	}
 }
 
 void AShooterCharacter::Aim()
@@ -146,17 +218,17 @@ void AShooterCharacter::AimTimeLineSet()
 	if (AimCurveFloat != nullptr)
 	{
 		FOnTimelineFloat TimeLineCallback;
-		FOnTimelineEventStatic TimeLineFinishedCallback;
 
 		TimeLineCallback.BindUFunction(this, FName("SetAimLocation"));
-		TimeLineFinishedCallback.BindUFunction(this, FName("SetADSLocation"));
 
 		AimTimeLine.AddInterpFloat(AimCurveFloat, TimeLineCallback);
-		AimTimeLine.SetTimelineFinishedFunc(TimeLineFinishedCallback);
+		AimTimeLine.SetLooping(false);
 
 		if (IsAiming)
 		{
 			AimTimeLine.Reverse();
+
+			Arms->SetRelativeRotation(FRotator(0).Quaternion());
 
 			IsAiming = false;
 		}
@@ -174,6 +246,30 @@ void AShooterCharacter::AimTimeLineSet()
 void AShooterCharacter::SetAimLocation(float Value)
 {
 	FVector NewArmLocation = FMath::Lerp<FVector, float>(FVector(1.6f, 7.8f, -23.6775f), FVector(-8, 0, -16), Value);
-
 	Arms->SetRelativeLocation(NewArmLocation);
+
+	if (EquippedGunSlot == EGunSlot::PRIMARY)
+	{
+		float NewCameraFOV = FMath::Lerp<float, float>(90, 60, Value);
+		Camera->SetFieldOfView(NewCameraFOV);
+	}
+}
+
+void AShooterCharacter::UnEquip()
+{
+	switch (EquippedGunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			PrimaryGun->SetMaxAmmo(0);
+			PrimaryGun->GetMesh()->SetVisibility(false);
+			PrimaryGunType = EGunType::NONE;
+			break;
+		case EGunSlot::SECONDARY:
+			SecondaryGun->SetMaxAmmo(0);
+			SecondaryGun->GetMesh()->SetVisibility(false);
+			SecondaryGunType = EGunType::NONE;
+			break;
+	}
+
+	Arms->SetVisibility(false);
 }

@@ -9,6 +9,7 @@
 UENUM(BlueprintType)
 enum class EGunType : uint8
 {
+	NONE UMETA(DisplayName = "NONE"),
 	GLOCK26 UMETA(DisplayName = "GLOCK26"),
 	MP5 UMETA(DisplayName = "MP5"),
 	AK74 UMETA(DisplayName = "AK74"),
@@ -34,8 +35,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	int32 GetAmmo() const;
 
-	UFUNCTION(BlueprintPure)
-	EGunType GetGunType() const;
+	USkeletalMeshComponent* GetMesh() const;
+
+	void SetMaxAmmo(int Value);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -88,9 +90,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	EGunType GunType;
-
-	bool IsReloading;
-	bool IsAiming;
 
 	void SetNextFlame();
 };

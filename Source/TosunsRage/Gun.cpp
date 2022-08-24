@@ -47,9 +47,15 @@ int32 AGun::GetAmmo() const
 	return Ammo;
 }
 
-EGunType AGun::GetGunType() const
+USkeletalMeshComponent* AGun::GetMesh() const
 {
-	return GunType;
+	return Mesh;
+}
+
+void AGun::SetMaxAmmo(int Value)
+{
+	MaxAmmo = Value;
+	Ammo = MaxAmmo;
 }
 
 // Called every frame
@@ -61,12 +67,12 @@ void AGun::Tick(float DeltaTime)
 
 void AGun::PullTrigger()
 {
-	if (IsReloading) return;
+	AShooterCharacter* OwnerCharacter = Cast<AShooterCharacter>(GetOwner());
+	if (OwnerCharacter == nullptr) return;
 
-	APawn* OwnerPawn = Cast<APawn>(GetOwner());
-	if (OwnerPawn == nullptr) return;
+	if (OwnerCharacter->GetIsReloading()) return;
 
-	AController* OwnerController = OwnerPawn->GetController();
+	AController* OwnerController = OwnerCharacter->GetController();
 	if (OwnerController == nullptr) return;
 
 	FVector Location;
@@ -88,7 +94,7 @@ void AGun::PullTrigger()
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 
-	Params.AddIgnoredActor(OwnerPawn);
+	Params.AddIgnoredActor(OwnerCharacter);
 	Params.AddIgnoredActor(this);
 
 	bool bSuccess = GetWorld()->LineTraceSingleByChannel(Hit, Location, End, ECollisionChannel::ECC_GameTraceChannel1, Params);
@@ -130,10 +136,10 @@ void AGun::Reload()
 {
 	if (Ammo == MaxAmmo) return;
 
-	IsReloading = true;
-
 	AShooterCharacter* OwnerCharacter = Cast<AShooterCharacter>(GetOwner());
 	if (OwnerCharacter == nullptr) return;
+
+	OwnerCharacter->SetIsReloading(true);
 
 	float ReloadTime = OwnerCharacter->PlayArmsAnimMontage(ArmsReloadAnim);
 	Mesh->PlayAnimation(GunReloadAnim, false);
@@ -143,15 +149,22 @@ void AGun::Reload()
 	GetWorldTimerManager().SetTimer(WaitHandle, [&]()
 		{
 			Ammo = MaxAmmo;
-			IsReloading = false;
+
+			AShooterCharacter* OwnerCharacter = Cast<AShooterCharacter>(GetOwner());
+			if (OwnerCharacter == nullptr) return;
+
+			OwnerCharacter->SetIsReloading(false);
 		}, ReloadTime, false);
 }
 
 void AGun::Aim()
 {
-	if (IsReloading) return;
+	AShooterCharacter* OwnerCharacter = Cast<AShooterCharacter>(GetOwner());
+	if (OwnerCharacter == nullptr) return;
 
-	IsAiming = true;
+	if (OwnerCharacter->GetIsReloading()) return;
+
+	OwnerCharacter->SetIsAiming(true);
 }
 
 void AGun::SetNextFlame()
