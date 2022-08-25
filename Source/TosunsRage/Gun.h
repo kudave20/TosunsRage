@@ -35,7 +35,13 @@ public:
 	UFUNCTION(BlueprintPure)
 	int32 GetAmmo() const;
 
+	float GetFireRate() const;
+
+	bool GetIsInFullAuto() const;
+
 	USkeletalMeshComponent* GetMesh() const;
+
+	UStaticMeshComponent* GetSuppressor() const;
 
 	void SetMaxAmmo(int Value);
 
@@ -58,6 +64,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* Flame;
+
+	UPROPERTY(VisibleAnywhere)
+	UStaticMeshComponent* Suppressor;
 
 	UPROPERTY(EditAnywhere)
 	UMaterialInterface* BulletHole;
@@ -85,6 +94,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	int32 Ammo;
+
+	UPROPERTY(EditAnywhere)
+	float FireRate;
+
+	UPROPERTY(EditAnywhere)
+	bool IsInFullAuto;
 
 	UPROPERTY(EditDefaultsOnly)
 	EGunType GunType;

@@ -39,7 +39,11 @@ public:
 	bool GetIsReloading() const;
 
 	UFUNCTION(BlueprintPure)
-	AGun* GetGun() const;
+	AGun* GetCurrentGun() const;
+
+	AGun* GetPrimaryGun() const;
+
+	AGun* GetSecondaryGun() const;
 
 	UFUNCTION(BlueprintPure)
 	EGunType GetGunType() const;
@@ -102,12 +106,17 @@ private:
 
 	FTimeline AimTimeLine;
 
+	FTimerHandle ShootWaitHandle;
+
 	void MoveForward(float AxisValue);
 	void MoveRight(float AxisValue);
 	void LookUpRate(float AxisValue);
 	void LookRightRate(float AxisValue);
 
 	void Shoot();
+	void PullTrigger();
+	void StopShooting();
+
 	void Die();
 
 	void Reload();

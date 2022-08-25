@@ -8,7 +8,7 @@ void ASurvivalGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	FTimerHandle WaitHandle;
-	GetWorldTimerManager().SetTimer(WaitHandle, this, &ASurvivalGameMode::SpawnTosun, 7.f, true, 1.f);
+	GetWorldTimerManager().SetTimer(WaitHandle, this, &ASurvivalGameMode::SpawnTosun, 7, true, 1);
 }
 
 void ASurvivalGameMode::Tick(float DeltaTime)

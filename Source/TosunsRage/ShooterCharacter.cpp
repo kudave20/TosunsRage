@@ -45,7 +45,7 @@ bool AShooterCharacter::GetIsReloading() const
 	return IsReloading;
 }
 
-AGun* AShooterCharacter::GetGun() const
+AGun* AShooterCharacter::GetCurrentGun() const
 {
 	switch (EquippedGunSlot)
 	{
@@ -56,6 +56,16 @@ AGun* AShooterCharacter::GetGun() const
 	}
 
 	return nullptr;
+}
+
+AGun* AShooterCharacter::GetPrimaryGun() const
+{
+	return PrimaryGun;
+}
+
+AGun* AShooterCharacter::GetSecondaryGun() const
+{
+	return SecondaryGun;
 }
 
 EGunType AShooterCharacter::GetGunType() const
@@ -102,6 +112,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAxis(TEXT("LookRightRate"), this, &AShooterCharacter::LookRightRate);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Shoot);
+	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Released, this, &AShooterCharacter::StopShooting);
 	PlayerInputComponent->BindAction(TEXT("Reload"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Reload);
 	PlayerInputComponent->BindAction(TEXT("Aim"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Aim);
 	PlayerInputComponent->BindAction(TEXT("Drop"), EInputEvent::IE_Pressed, this, &AShooterCharacter::UnEquip);
@@ -146,7 +157,11 @@ void AShooterCharacter::Equip(EGunSlot GunSlot, EGunType GunType, TSubclassOf<AG
 			PrimaryGun->SetOwner(this);
 			PrimaryGunType = GunType;
 
-			if (SecondaryGun != nullptr) SecondaryGun->GetMesh()->SetVisibility(false);
+			if (SecondaryGun != nullptr)
+			{
+				SecondaryGun->GetMesh()->SetVisibility(false);
+				SecondaryGun->GetSuppressor()->SetVisibility(false);
+			}
 
 			break;
 		case EGunSlot::SECONDARY:
@@ -155,7 +170,11 @@ void AShooterCharacter::Equip(EGunSlot GunSlot, EGunType GunType, TSubclassOf<AG
 			SecondaryGun->SetOwner(this);
 			SecondaryGunType = GunType;
 
-			if (PrimaryGun != nullptr) PrimaryGun->GetMesh()->SetVisibility(false);
+			if (PrimaryGun != nullptr)
+			{
+				PrimaryGun->GetMesh()->SetVisibility(false);
+				PrimaryGun->GetSuppressor()->SetVisibility(false);
+			}
 
 			break;
 	}
@@ -219,12 +238,43 @@ void AShooterCharacter::Shoot()
 	switch (EquippedGunSlot)
 	{
 		case EGunSlot::PRIMARY:
-			if (PrimaryGun != nullptr) PrimaryGun->PullTrigger();
+			if (PrimaryGun != nullptr && PrimaryGun->GetIsInFullAuto())
+			{
+				GetWorldTimerManager().SetTimer(ShootWaitHandle, this, &AShooterCharacter::PullTrigger, PrimaryGun->GetFireRate(), true, 0);
+			}
+
+			if (PrimaryGun != nullptr && !PrimaryGun->GetIsInFullAuto()) PrimaryGun->PullTrigger();
+
 			break;
 		case EGunSlot::SECONDARY:
-			if (SecondaryGun != nullptr) SecondaryGun->PullTrigger();
+			if (SecondaryGun != nullptr && SecondaryGun->GetIsInFullAuto())
+			{
+				FTimerHandle WaitHandle;
+				GetWorldTimerManager().SetTimer(ShootWaitHandle, this, &AShooterCharacter::PullTrigger, SecondaryGun->GetFireRate(), true, 0);
+			}
+
+			if (SecondaryGun != nullptr && !SecondaryGun->GetIsInFullAuto()) SecondaryGun->PullTrigger();
+
 			break;
 	}
+}
+
+void AShooterCharacter::PullTrigger()
+{
+	switch (EquippedGunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			PrimaryGun->PullTrigger();
+			break;
+		case EGunSlot::SECONDARY:
+			SecondaryGun->PullTrigger();
+			break;
+	}
+}
+
+void AShooterCharacter::StopShooting()
+{
+	GetWorldTimerManager().ClearTimer(ShootWaitHandle);
 }
 
 void AShooterCharacter::Die()
@@ -249,6 +299,8 @@ void AShooterCharacter::Reload()
 
 void AShooterCharacter::Aim()
 {
+	if (IsReloading) return;
+
 	AimTimeLineSet();
 }
 
@@ -268,13 +320,18 @@ void AShooterCharacter::EquipPrimary()
 {
 	if (EquippedGunSlot == EGunSlot::PRIMARY) return;
 
-	if (SecondaryGun != nullptr) SecondaryGun->GetMesh()->SetVisibility(false);
+	if (SecondaryGun != nullptr)
+	{
+		SecondaryGun->GetMesh()->SetVisibility(false);
+		SecondaryGun->GetSuppressor()->SetVisibility(false);
+	}
 
 	if (PrimaryGun == nullptr) Arms->SetVisibility(false);
 	else
 	{
 		Arms->SetVisibility(true);
 		PrimaryGun->GetMesh()->SetVisibility(true);
+		PrimaryGun->GetSuppressor()->SetVisibility(true);
 	}
 
 	EquippedGunSlot = EGunSlot::PRIMARY;
@@ -284,13 +341,18 @@ void AShooterCharacter::EquipSecondary()
 {
 	if (EquippedGunSlot == EGunSlot::SECONDARY) return;
 
-	if (PrimaryGun != nullptr) PrimaryGun->GetMesh()->SetVisibility(false);
+	if (PrimaryGun != nullptr)
+	{
+		PrimaryGun->GetMesh()->SetVisibility(false);
+		PrimaryGun->GetSuppressor()->SetVisibility(false);
+	}
 
 	if (SecondaryGun == nullptr) Arms->SetVisibility(false);
 	else
 	{
 		Arms->SetVisibility(true);
 		SecondaryGun->GetMesh()->SetVisibility(true);
+		SecondaryGun->GetSuppressor()->SetVisibility(true);
 	}
 
 	EquippedGunSlot = EGunSlot::SECONDARY;
@@ -307,6 +369,7 @@ void AShooterCharacter::Switch()
 			
 			Arms->SetVisibility(true);
 			SecondaryGun->GetMesh()->SetVisibility(true);
+			SecondaryGun->GetSuppressor()->SetVisibility(false);
 			
 			EquippedGunSlot = EGunSlot::SECONDARY;
 			
@@ -315,8 +378,10 @@ void AShooterCharacter::Switch()
 			if (PrimaryGun == nullptr) return;
 
 			if (SecondaryGun != nullptr) SecondaryGun->GetMesh()->SetVisibility(false);
+
 			Arms->SetVisibility(true);
 			PrimaryGun->GetMesh()->SetVisibility(true);
+			PrimaryGun->GetSuppressor()->SetVisibility(false);
 
 			EquippedGunSlot = EGunSlot::PRIMARY;
 
@@ -333,12 +398,14 @@ void AShooterCharacter::UnEquip()
 		case EGunSlot::PRIMARY:
 			PrimaryGun->SetMaxAmmo(0);
 			PrimaryGun->GetMesh()->SetVisibility(false);
+			PrimaryGun->GetSuppressor()->SetVisibility(false);
 			PrimaryGun = nullptr;
 			PrimaryGunType = EGunType::NONE;
 			break;
 		case EGunSlot::SECONDARY:
 			SecondaryGun->SetMaxAmmo(0);
 			SecondaryGun->GetMesh()->SetVisibility(false);
+			SecondaryGun->GetSuppressor()->SetVisibility(false);
 			SecondaryGun = nullptr;
 			SecondaryGunType = EGunType::NONE;
 			break;

@@ -28,6 +28,9 @@ AGun::AGun()
 
 	Flame = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Flame"));
 	Flame->SetupAttachment(Root);
+
+	Suppressor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Suppressor"));
+	Suppressor->SetupAttachment(Root);
 }
 
 // Called when the game starts or when spawned
@@ -36,6 +39,8 @@ void AGun::BeginPlay()
 	Super::BeginPlay();
 
 	Ammo = MaxAmmo;
+
+	FireRate = 60 / FireRate;
 }
 
 int32 AGun::GetMaxAmmo() const
@@ -48,9 +53,24 @@ int32 AGun::GetAmmo() const
 	return Ammo;
 }
 
+float AGun::GetFireRate() const
+{
+	return FireRate;
+}
+
+bool AGun::GetIsInFullAuto() const
+{
+	return IsInFullAuto;
+}
+
 USkeletalMeshComponent* AGun::GetMesh() const
 {
 	return Mesh;
+}
+
+UStaticMeshComponent* AGun::GetSuppressor() const
+{
+	return Suppressor;
 }
 
 void AGun::SetMaxAmmo(int Value)
@@ -124,7 +144,7 @@ void AGun::PullTrigger()
 			Light->SetIntensity(0);
 			Flame->SetVisibility(false);
 			SetNextFlame();
-		}, 0.1f, false);
+		}, 0.05f, false);
 
 	// Spawn Bullet Decal
 	UDecalComponent* Decal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), BulletHole, FVector(3.2f, 6.4f, 6.4f), Hit.Location, Hit.ImpactPoint.Rotation());

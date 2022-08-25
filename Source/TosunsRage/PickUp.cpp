@@ -15,7 +15,7 @@ APickUp::APickUp()
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	SetRootComponent(Root);
 
-	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
+	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	Mesh->SetupAttachment(Root);
 
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
@@ -46,9 +46,26 @@ void APickUp::OverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 
 	if (!Player->GetIsReloading())
 	{
-		Player->Equip(GunSlot, GunType, GunClass);
+		switch (GunSlot)
+		{
+			case EGunSlot::PRIMARY:
+				if (Player->GetPrimaryGun() == nullptr)
+				{
+					Player->Equip(GunSlot, GunType, GunClass);
+					GetWorld()->DestroyActor(this);
+				}
 
-		GetWorld()->DestroyActor(this);
+				break;
+			case EGunSlot::SECONDARY:
+				if (Player->GetSecondaryGun() == nullptr)
+				{
+					Player->Equip(GunSlot, GunType, GunClass);
+					GetWorld()->DestroyActor(this);
+				}
+
+				break;
+		}
+
 	}
 }
 

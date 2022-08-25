@@ -30,7 +30,7 @@ private:
 	USceneComponent* Root;
 
 	UPROPERTY(VisibleAnywhere)
-	USkeletalMeshComponent* Mesh;
+	UStaticMeshComponent* Mesh;
 
 	UPROPERTY(VisibleAnywhere)
 	class USphereComponent* Sphere;
