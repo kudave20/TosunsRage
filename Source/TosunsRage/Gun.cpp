@@ -111,7 +111,7 @@ void AGun::PullTrigger()
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DrySound, Location);
 		return;
 	}
-	
+
 	Ammo--;
 
 	UGameplayStatics::SpawnSoundAttached(GunSound, Mesh, TEXT("MuzzleFlashSocket"));
@@ -138,6 +138,33 @@ void AGun::PullTrigger()
 		}
 	}
 
+	// Spawn Bullet Decal
+	UDecalComponent* Decal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), BulletHole, FVector(3.2f, 6.4f, 6.4f), Hit.Location, Hit.ImpactPoint.Rotation());
+	Decal->FadeScreenSize = 0.00001f;
+	Decal->FadeStartDelay = 180;
+	Decal->FadeDuration = 5;
+
+	UAnimInstance* AnimInstance = OwnerCharacter->GetArms()->GetAnimInstance();
+	if (AnimInstance == nullptr) return;
+	
+	// Recoil
+	if (OwnerCharacter->GetIsAiming())
+	{
+		OwnerCharacter->AddControllerPitchInput(FMath::RandRange(MinPitchADSRecoil, MaxPitchADSRecoil));
+		OwnerCharacter->AddControllerYawInput(FMath::RandRange(MinYawADSRecoil, MaxYawADSRecoil));
+
+		AnimInstance->Montage_Play(ArmsADSShootAnim);
+	}
+	else
+	{
+		OwnerCharacter->AddControllerPitchInput(FMath::RandRange(MinPitchRecoil, MaxPitchRecoil));
+		OwnerCharacter->AddControllerYawInput(FMath::RandRange(MinYawRecoil, MaxYawRecoil));
+
+		AnimInstance->Montage_Play(ArmsShootAnim);
+	}
+
+	Mesh->PlayAnimation(ShootAnim, false);
+
 	// Activate Muzzle Flash
 	Light->SetIntensity(20000);
 	Flame->SetVisibility(true);
@@ -150,12 +177,6 @@ void AGun::PullTrigger()
 			Flame->SetVisibility(false);
 			SetNextFlame();
 		}, 0.05f, false);
-
-	// Spawn Bullet Decal
-	UDecalComponent* Decal = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), BulletHole, FVector(3.2f, 6.4f, 6.4f), Hit.Location, Hit.ImpactPoint.Rotation());
-	Decal->FadeScreenSize = 0.00001f;
-	Decal->FadeStartDelay = 180;
-	Decal->FadeDuration = 5;
 }
 
 void AGun::Reload()

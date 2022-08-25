@@ -34,6 +34,11 @@ void AShooterCharacter::BeginPlay()
 	Health = MaxHealth;
 }
 
+USkeletalMeshComponent* AShooterCharacter::GetArms() const
+{
+	return Arms;
+}
+
 float AShooterCharacter::GetHealth() const
 {
 	return Health;
@@ -325,7 +330,7 @@ void AShooterCharacter::SetAimLocation(float Value)
 	FVector NewArmLocation = FMath::Lerp<FVector, float>(FVector(1.6f, 7.8f, -23.6775f), FVector(-8, 0, -16), Value);
 	Arms->SetRelativeLocation(NewArmLocation);
 
-	if (EquippedGunSlot == EGunSlot::PRIMARY)
+	if (EquippedGunSlot == EGunSlot::PRIMARY && !IsSwitchingToPrimary)
 	{
 		float NewCameraFOV = FMath::Lerp<float, float>(90, 60, Value);
 		Camera->SetFieldOfView(NewCameraFOV);
@@ -334,9 +339,19 @@ void AShooterCharacter::SetAimLocation(float Value)
 
 void AShooterCharacter::EquipPrimary()
 {
-	if (IsAiming) return;
-
 	if (EquippedGunSlot == EGunSlot::PRIMARY) return;
+
+	if (IsAiming)
+	{
+		IsSwitchingToPrimary = true;
+		AimTimeLineSet();
+
+		FTimerHandle WaitHandle;
+		GetWorldTimerManager().SetTimer(WaitHandle, [&]()
+			{
+				IsSwitchingToPrimary = false;
+			}, 0.1f, false);
+	}
 
 	if (SecondaryGun != nullptr)
 	{
@@ -353,18 +368,29 @@ void AShooterCharacter::EquipPrimary()
 	}
 
 	EquippedGunSlot = EGunSlot::PRIMARY;
-
-	if (EquippedGunSlot == EGunSlot::PRIMARY) UE_LOG(LogTemp, Warning, TEXT("1!"));
-	if (EquippedGunSlot == EGunSlot::SECONDARY) UE_LOG(LogTemp, Warning, TEXT("2!"));
 }
 
 void AShooterCharacter::EquipSecondary()
 {
 	if (EquippedGunSlot == EGunSlot::SECONDARY) return;
 
+	bool bCheck = false;
+
 	if (PrimaryGun != nullptr)
 	{
-		if (IsAiming) AimTimeLineSet();
+		if (IsAiming)
+		{
+			AimTimeLineSet();
+			
+			FTimerHandle WaitHandle;
+			GetWorldTimerManager().SetTimer(WaitHandle, [&]()
+				{
+					EquippedGunSlot = EGunSlot::SECONDARY;
+				}, 0.1f, false);
+
+			bCheck = true;
+		}
+
 		PrimaryGun->GetMesh()->SetVisibility(false);
 		PrimaryGun->GetSuppressor()->SetVisibility(false);
 	}
@@ -377,7 +403,7 @@ void AShooterCharacter::EquipSecondary()
 		SecondaryGun->GetSuppressor()->SetVisibility(true);
 	}
 
-	EquippedGunSlot = EGunSlot::SECONDARY;
+	if (!bCheck) EquippedGunSlot = EGunSlot::SECONDARY;
 }
 
 void AShooterCharacter::Switch()

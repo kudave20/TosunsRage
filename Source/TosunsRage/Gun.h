@@ -87,6 +87,15 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	UAnimMontage* GunReloadAnim;
 
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* ArmsShootAnim;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* ArmsADSShootAnim;
+
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* ShootAnim;
+
 	UPROPERTY(EditAnywhere)
 	float MaxRange = 100000;
 
@@ -101,6 +110,30 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float FireRate;
+
+	UPROPERTY(EditAnywhere)
+	float MinPitchRecoil;
+
+	UPROPERTY(EditAnywhere)
+	float MaxPitchRecoil;
+
+	UPROPERTY(EditAnywhere)
+	float MinYawRecoil;
+
+	UPROPERTY(EditAnywhere)
+	float MaxYawRecoil;
+
+	UPROPERTY(EditAnywhere)
+	float MinPitchADSRecoil;
+
+	UPROPERTY(EditAnywhere)
+	float MaxPitchADSRecoil;
+
+	UPROPERTY(EditAnywhere)
+	float MinYawADSRecoil;
+
+	UPROPERTY(EditAnywhere)
+	float MaxYawADSRecoil;
 
 	UPROPERTY(EditAnywhere)
 	bool IsInFullAuto;

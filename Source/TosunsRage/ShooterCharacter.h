@@ -31,6 +31,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	USkeletalMeshComponent* GetArms() const;
+
 	UFUNCTION(BlueprintPure)
 	float GetHealth() const;
 
@@ -90,6 +92,7 @@ private:
 
 	bool IsAiming;
 	bool IsReloading;
+	bool IsSwitchingToPrimary;
 
 	UPROPERTY(EditAnywhere)
 	USoundBase* HurtSound;
