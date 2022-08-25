@@ -15,6 +15,8 @@ enum class EGunType : uint8
 	AK74 UMETA(DisplayName = "AK74"),
 };
 
+class APickUp;
+
 UCLASS()
 class TOSUNSRAGE_API AGun : public AActor
 {
@@ -42,6 +44,8 @@ public:
 	USkeletalMeshComponent* GetMesh() const;
 
 	UStaticMeshComponent* GetSuppressor() const;
+
+	TSubclassOf<APickUp> GetPickUpClass() const;
 
 	void SetMaxAmmo(int Value);
 
@@ -103,6 +107,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	EGunType GunType;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<APickUp> PickUpClass;
 
 	void SetNextFlame();
 };

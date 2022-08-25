@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "PickUp.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter()
@@ -20,6 +21,9 @@ AShooterCharacter::AShooterCharacter()
 	Arms = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Arms"));
 	Arms->SetupAttachment(Camera);
 	Arms->SetVisibility(false);
+
+	ThrowPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ThrowPoint"));
+	ThrowPoint->SetupAttachment(Camera);
 }
 
 // Called when the game starts or when spawned
@@ -286,6 +290,8 @@ void AShooterCharacter::Die()
 
 void AShooterCharacter::Reload()
 {
+	if (IsReloading) return;
+
 	switch (EquippedGunSlot)
 	{
 		case EGunSlot::PRIMARY:
@@ -300,6 +306,16 @@ void AShooterCharacter::Reload()
 void AShooterCharacter::Aim()
 {
 	if (IsReloading) return;
+
+	switch (EquippedGunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			if (PrimaryGun == nullptr) return;
+			break;
+		case EGunSlot::SECONDARY:
+			if (SecondaryGun == nullptr) return;
+			break;
+	}
 
 	AimTimeLineSet();
 }
@@ -318,6 +334,8 @@ void AShooterCharacter::SetAimLocation(float Value)
 
 void AShooterCharacter::EquipPrimary()
 {
+	if (IsAiming) return;
+
 	if (EquippedGunSlot == EGunSlot::PRIMARY) return;
 
 	if (SecondaryGun != nullptr)
@@ -335,6 +353,9 @@ void AShooterCharacter::EquipPrimary()
 	}
 
 	EquippedGunSlot = EGunSlot::PRIMARY;
+
+	if (EquippedGunSlot == EGunSlot::PRIMARY) UE_LOG(LogTemp, Warning, TEXT("1!"));
+	if (EquippedGunSlot == EGunSlot::SECONDARY) UE_LOG(LogTemp, Warning, TEXT("2!"));
 }
 
 void AShooterCharacter::EquipSecondary()
@@ -343,6 +364,7 @@ void AShooterCharacter::EquipSecondary()
 
 	if (PrimaryGun != nullptr)
 	{
+		if (IsAiming) AimTimeLineSet();
 		PrimaryGun->GetMesh()->SetVisibility(false);
 		PrimaryGun->GetSuppressor()->SetVisibility(false);
 	}
@@ -360,6 +382,8 @@ void AShooterCharacter::EquipSecondary()
 
 void AShooterCharacter::Switch()
 {
+	if (IsAiming) return;
+
 	switch (EquippedGunSlot)
 	{
 		case EGunSlot::PRIMARY:
@@ -393,21 +417,35 @@ void AShooterCharacter::UnEquip()
 {
 	if (IsReloading) return;
 
+	float RandomFloat = FMath::RandRange(-180.f, 180.f);
+
 	switch (EquippedGunSlot)
 	{
 		case EGunSlot::PRIMARY:
 			PrimaryGun->SetMaxAmmo(0);
 			PrimaryGun->GetMesh()->SetVisibility(false);
 			PrimaryGun->GetSuppressor()->SetVisibility(false);
+
+			// Throw PickUp
+			PickUp = GetWorld()->SpawnActor<APickUp>(PrimaryGun->GetPickUpClass(), ThrowPoint->GetComponentLocation(), FRotator(RandomFloat));
+			PickUp->GetMesh()->AddImpulse(ThrowPoint->GetForwardVector() * 500, NAME_None, true);
+
 			PrimaryGun = nullptr;
 			PrimaryGunType = EGunType::NONE;
+
 			break;
 		case EGunSlot::SECONDARY:
 			SecondaryGun->SetMaxAmmo(0);
 			SecondaryGun->GetMesh()->SetVisibility(false);
 			SecondaryGun->GetSuppressor()->SetVisibility(false);
+
+			// Throw PickUp
+			PickUp = GetWorld()->SpawnActor<APickUp>(SecondaryGun->GetPickUpClass(), ThrowPoint->GetComponentLocation(), FRotator(RandomFloat));
+			PickUp->GetMesh()->AddImpulse(ThrowPoint->GetForwardVector() * 500, NAME_None, true);
+
 			SecondaryGun = nullptr;
 			SecondaryGunType = EGunType::NONE;
+
 			break;
 	}
 

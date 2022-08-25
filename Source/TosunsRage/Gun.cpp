@@ -73,6 +73,11 @@ UStaticMeshComponent* AGun::GetSuppressor() const
 	return Suppressor;
 }
 
+TSubclassOf<APickUp> AGun::GetPickUpClass() const
+{
+	return PickUpClass;
+}
+
 void AGun::SetMaxAmmo(int Value)
 {
 	MaxAmmo = Value;

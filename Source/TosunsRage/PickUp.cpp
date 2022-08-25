@@ -32,6 +32,11 @@ void APickUp::BeginPlay()
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &APickUp::OverlapBegin);
 }
 
+UStaticMeshComponent* APickUp::GetMesh() const
+{
+	return Mesh;
+}
+
 // Called every frame
 void APickUp::Tick(float DeltaTime)
 {

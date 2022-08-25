@@ -15,6 +15,7 @@ enum class EGunSlot : uint8
 };
 
 class AGun;
+class APickUp;
 
 UCLASS()
 class TOSUNSRAGE_API AShooterCharacter : public ACharacter
@@ -73,6 +74,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* Arms;
 
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* ThrowPoint;
+
 	UPROPERTY(EditAnywhere)
 	float RotationRate = 70;
 
@@ -95,6 +99,9 @@ private:
 
 	UPROPERTY()
 	AGun* SecondaryGun;
+
+	UPROPERTY()
+	APickUp* PickUp;
 
 	EGunType PrimaryGunType;
 	EGunType SecondaryGunType;
