@@ -7,8 +7,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "ShooterCharacter.h"
 #include "TimerManager.h"
-#include "AIController.h"
-#include "BrainComponent.h"
 
 // Sets default values
 AEnemy::AEnemy()
@@ -22,7 +20,7 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	Health = MaxHealth;
 }
 
@@ -60,32 +58,7 @@ float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEv
 
 void AEnemy::Attack()
 {
-	IsAttacking = true;
-
-	FVector Direction = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation() - GetActorLocation();
-
-	FVector Start = GetActorLocation();
-	FVector End = GetActorLocation() + Direction;
-
-	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(this);
-
-	FHitResult Hit;
-
-	bool bSuccess = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 25,
-		UEngineTypes::ConvertToTraceType(ECC_Camera), true, ActorsToIgnore,
-		EDrawDebugTrace::ForDuration, Hit, true);
-
-	if (bSuccess)
-	{
-		AShooterCharacter* Player = Cast<AShooterCharacter>(Hit.GetActor());
-
-		if (Player != nullptr)
-		{
-			FPointDamageEvent DamageEvent(Damage, Hit, -Direction, nullptr);
-			Player->TakeDamage(Damage, DamageEvent, GetController(), this);
-		}
-	}
+	
 }
 
 void AEnemy::SetIsAttacking(bool bIsAttacking)

@@ -16,8 +16,15 @@ public:
 	AEnemy();
 
 protected:
+	bool IsAttacking;
+
+	UPROPERTY(EditAnywhere)
+	float Damage = 10;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void Die();
 
 public:
 	UFUNCTION(BlueprintPure)
@@ -31,19 +38,16 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	void Attack();
+	virtual void Attack();
 
-	void SetIsAttacking(bool bAttack);
+	virtual void SetIsAttacking(bool bIsAttacking);
 
 private:
 	UPROPERTY(EditDefaultsOnly)
-	float MaxHealth = 100;
+	float MaxHealth = 20;
 
 	UPROPERTY(VisibleAnywhere)
 	float Health;
-
-	UPROPERTY(EditAnywhere)
-	float Damage = 10;
 
 	UPROPERTY(EditAnywhere)
 	USoundBase* HitSound;
@@ -55,7 +59,4 @@ private:
 	USoundBase* KillVoice;
 
 	bool IsDead;
-	bool IsAttacking;
-
-	void Die();
 };

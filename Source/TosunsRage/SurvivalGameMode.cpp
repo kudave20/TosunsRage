@@ -7,8 +7,8 @@ void ASurvivalGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FTimerHandle WaitHandle;
-	GetWorldTimerManager().SetTimer(WaitHandle, this, &ASurvivalGameMode::SpawnTosun, 7, true, 1);
+	GetWorldTimerManager().SetTimer(TosunWaitHandle, this, &ASurvivalGameMode::SpawnTosun, 7, true, 1);
+	GetWorldTimerManager().SetTimer(BombTosunWaitHandle, this, &ASurvivalGameMode::SpawnBombTosun, 7, true, 1);
 }
 
 void ASurvivalGameMode::Tick(float DeltaTime)
@@ -18,7 +18,11 @@ void ASurvivalGameMode::Tick(float DeltaTime)
 
 void ASurvivalGameMode::SpawnTosun()
 {
-	if (IsGameOver) return;
+	if (IsGameOver)
+	{
+		GetWorldTimerManager().ClearTimer(TosunWaitHandle);
+		return;
+	}
 
 	// float X = FMath::RandRange(-1420.f, 380.f);
 	// float Y = FMath::RandRange(-350.f, 750.f);
@@ -30,4 +34,24 @@ void ASurvivalGameMode::SpawnTosun()
 	Location.Z = 256;
 
 	GetWorld()->SpawnActor<AActor>(Tosun, Location, Rotation);
+}
+
+void ASurvivalGameMode::SpawnBombTosun()
+{
+	if (IsGameOver)
+	{
+		GetWorldTimerManager().ClearTimer(BombTosunWaitHandle);
+		return;
+	}
+
+	// float X = FMath::RandRange(-1420.f, 380.f);
+	// float Y = FMath::RandRange(-350.f, 750.f);
+	FVector Location(-220, -670, 691);
+	FRotator Rotation;
+
+	GetWorld()->SpawnActor<AActor>(BombTosun, Location, Rotation);
+
+	Location.Z = 256;
+
+	GetWorld()->SpawnActor<AActor>(BombTosun, Location, Rotation);
 }

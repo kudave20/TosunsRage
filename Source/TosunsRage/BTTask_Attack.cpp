@@ -4,6 +4,8 @@
 #include "BTTask_Attack.h"
 #include "AIController.h"
 #include "Enemy.h"
+#include "Tosun.h"
+#include "BombTosun.h"
 
 UBTTask_Attack::UBTTask_Attack()
 {
@@ -17,11 +19,24 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 
     if (OwnerComp.GetAIOwner() == nullptr) return EBTNodeResult::Failed;
 
-    AEnemy* Enemy = Cast<AEnemy>(OwnerComp.GetAIOwner()->GetPawn());
+    APawn* OwnerPawn = OwnerComp.GetAIOwner()->GetPawn();
 
-    if (Enemy == nullptr) return EBTNodeResult::Failed;
+    if (OwnerPawn->IsA(ATosun::StaticClass()))
+    {
+        ATosun* Enemy = Cast<ATosun>(OwnerPawn);
 
-    Enemy->Attack();
+        if (Enemy == nullptr) return EBTNodeResult::Failed;
+
+        Enemy->Attack();
+    }
+    else if (OwnerPawn->IsA(ABombTosun::StaticClass()))
+    {
+        ABombTosun* Enemy = Cast<ABombTosun>(OwnerPawn);
+
+        if (Enemy == nullptr) return EBTNodeResult::Failed;
+
+        Enemy->Attack();
+    }
 
     return EBTNodeResult::Succeeded;
 }
