@@ -24,6 +24,64 @@ void AEnemy::BeginPlay()
 	Health = MaxHealth;
 }
 
+void AEnemy::SphereTrace(FVector Direction, FVector Start, FVector End)
+{
+	TArray<AActor*> ActorsToIgnore;
+	ActorsToIgnore.Add(this);
+
+	FHitResult Hit;
+
+	bool bSuccess = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 25,
+		UEngineTypes::ConvertToTraceType(ECC_Camera), true, ActorsToIgnore,
+		EDrawDebugTrace::ForDuration, Hit, true);
+
+	if (bSuccess)
+	{
+		AShooterCharacter* Player = Cast<AShooterCharacter>(Hit.GetActor());
+
+		if (Player != nullptr)
+		{
+			FPointDamageEvent DamageEvent(Damage, Hit, -Direction, nullptr);
+			Player->TakeDamage(Damage, DamageEvent, GetController(), this);
+		}
+	}
+}
+
+void AEnemy::Die()
+{
+	DetachFromControllerPendingDestroy();
+
+	// Ragdoll
+	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
+	CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CapsuleComp->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	SetActorEnableCollision(true);
+
+	GetMesh()->SetAllBodiesSimulatePhysics(true);
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->WakeAllRigidBodies();
+	GetMesh()->bBlendPhysics = true;
+
+	UCharacterMovementComponent* CharacterComp = Cast<UCharacterMovementComponent>(GetMovementComponent());
+	if (CharacterComp != nullptr)
+	{
+		CharacterComp->StopMovementImmediately();
+		CharacterComp->DisableMovement();
+		CharacterComp->SetComponentTickEnabled(false);
+	}
+
+	SetLifeSpan(10.0f);
+
+	// Play UI Sound
+	UGameplayStatics::PlaySound2D(GetWorld(), KillSound);
+
+	if (FMath::RandBool()) UGameplayStatics::PlaySound2D(GetWorld(), KillVoice);
+
+	IsDead = true;
+}
+
 bool AEnemy::GetIsAttacking()
 {
 	return IsAttacking;
@@ -64,40 +122,5 @@ void AEnemy::Attack()
 void AEnemy::SetIsAttacking(bool bIsAttacking)
 {
 	IsAttacking = bIsAttacking;
-}
-
-void AEnemy::Die()
-{
-	DetachFromControllerPendingDestroy();
-
-	// Ragdoll
-	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
-	CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	CapsuleComp->SetCollisionResponseToAllChannels(ECR_Ignore);
-
-	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
-	SetActorEnableCollision(true);
-
-	GetMesh()->SetAllBodiesSimulatePhysics(true);
-	GetMesh()->SetSimulatePhysics(true);
-	GetMesh()->WakeAllRigidBodies();
-	GetMesh()->bBlendPhysics = true;
-
-	UCharacterMovementComponent* CharacterComp = Cast<UCharacterMovementComponent>(GetMovementComponent());
-	if (CharacterComp != nullptr)
-	{
-		CharacterComp->StopMovementImmediately();
-		CharacterComp->DisableMovement();
-		CharacterComp->SetComponentTickEnabled(false);
-	}
-
-	SetLifeSpan(10.0f);
-
-	// Play UI Sound
-	UGameplayStatics::PlaySound2D(GetWorld(), KillSound);
-
-	if (FMath::RandBool()) UGameplayStatics::PlaySound2D(GetWorld(), KillVoice);
-
-	IsDead = true;
 }
 

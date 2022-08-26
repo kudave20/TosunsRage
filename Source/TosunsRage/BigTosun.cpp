@@ -1,10 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Tosun.h"
+#include "BigTosun.h"
 #include "Kismet/GameplayStatics.h"
+#include "ShooterCharacter.h"
 
-void ATosun::Attack()
+void ABigTosun::Attack()
 {
 	Super::Attack();
 
@@ -17,7 +18,6 @@ void ATosun::Attack()
 	FTimerHandle WaitHandle;
 	FTimerDelegate TimerDelegate;
 	TimerDelegate.BindUFunction(this, FName("SphereTrace"), Direction, Start, End);
-	
-	GetWorldTimerManager().SetTimer(WaitHandle, TimerDelegate, 1, false);
-}
 
+	GetWorldTimerManager().SetTimer(WaitHandle, TimerDelegate, 1.5f, false);
+}

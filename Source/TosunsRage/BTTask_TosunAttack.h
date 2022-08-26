@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "BTTask_Attack.generated.h"
+#include "BTTask_TosunAttack.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TOSUNSRAGE_API UBTTask_Attack : public UBTTaskNode
+class TOSUNSRAGE_API UBTTask_TosunAttack : public UBTTaskNode
 {
 	GENERATED_BODY()
-	
+
 public:
-	UBTTask_Attack();
-	
+	UBTTask_TosunAttack();
+
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 };

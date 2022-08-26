@@ -24,6 +24,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	void SphereTrace(FVector Direction, FVector Start, FVector End);
+
 	void Die();
 
 public:

@@ -14,9 +14,6 @@ class TOSUNSRAGE_API ABombTosun : public AEnemy
 {
 	GENERATED_BODY()
 
-protected:
-	virtual void BeginPlay() override;
-
 public:
 	virtual void Attack() override;
 

@@ -28,11 +28,16 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<ACharacter> BombTosun;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<ACharacter> BigTosun;
+
 	bool IsGameOver;
 
 	FTimerHandle TosunWaitHandle;
 	FTimerHandle BombTosunWaitHandle;
+	FTimerHandle BigTosunWaitHandle;
 
 	void SpawnTosun();
 	void SpawnBombTosun();
+	void SpawnBigTosun();
 };

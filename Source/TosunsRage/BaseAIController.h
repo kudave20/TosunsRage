@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
-#include "TosunAIController.generated.h"
+#include "BaseAIController.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TOSUNSRAGE_API ATosunAIController : public AAIController
+class TOSUNSRAGE_API ABaseAIController : public AAIController
 {
 	GENERATED_BODY()
 

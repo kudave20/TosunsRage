@@ -5,11 +5,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "ShooterCharacter.h"
 
-void ABombTosun::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void ABombTosun::Attack()
 {
 	Super::Attack();
@@ -21,25 +16,7 @@ void ABombTosun::Attack()
 	FVector Start = GetActorLocation();
 	FVector End = GetActorLocation() + Direction;
 
-	TArray<AActor*> ActorsToIgnore;
-	ActorsToIgnore.Add(this);
-
-	FHitResult Hit;
-
-	bool bSuccess = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 25,
-		UEngineTypes::ConvertToTraceType(ECC_Camera), true, ActorsToIgnore,
-		EDrawDebugTrace::ForDuration, Hit, true);
-
-	if (bSuccess)
-	{
-		AShooterCharacter* Player = Cast<AShooterCharacter>(Hit.GetActor());
-
-		if (Player != nullptr)
-		{
-			FPointDamageEvent DamageEvent(Damage, Hit, -Direction, nullptr);
-			Player->TakeDamage(Damage, DamageEvent, GetController(), this);
-		}
-	}
+	SphereTrace(Direction, Start, End);
 
 	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Explosion, GetActorLocation());
 	UGameplayStatics::SpawnSoundAtLocation(GetWorld(), ExplosionSound, GetActorLocation());

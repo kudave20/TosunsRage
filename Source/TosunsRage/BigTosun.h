@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Enemy.h"
-#include "Tosun.generated.h"
+#include "BigTosun.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TOSUNSRAGE_API ATosun : public AEnemy
+class TOSUNSRAGE_API ABigTosun : public AEnemy
 {
 	GENERATED_BODY()
 	
