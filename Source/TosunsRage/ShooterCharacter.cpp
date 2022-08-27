@@ -291,7 +291,7 @@ void AShooterCharacter::Die()
 {
 	IsDead = true;
 
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	APlayerController* PlayerController = GetController<APlayerController>();
 	if (PlayerController != nullptr) PlayerController->GameHasEnded(nullptr, false);
 }
 

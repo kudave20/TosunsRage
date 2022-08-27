@@ -2,6 +2,8 @@
 
 
 #include "SurvivalGameMode.h"
+#include "Kismet/GameplayStatics.h"
+#include "Components/AudioComponent.h"
 
 void ASurvivalGameMode::BeginPlay()
 {
@@ -10,11 +12,28 @@ void ASurvivalGameMode::BeginPlay()
 	GetWorldTimerManager().SetTimer(TosunWaitHandle, this, &ASurvivalGameMode::SpawnTosun, 10, true, 1);
 	GetWorldTimerManager().SetTimer(BombTosunWaitHandle, this, &ASurvivalGameMode::SpawnBombTosun, 10, true, 1);
 	GetWorldTimerManager().SetTimer(BigTosunWaitHandle, this, &ASurvivalGameMode::SpawnBigTosun, 40, true, 1);
+
+	AudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), FailedMusic);
 }
 
 void ASurvivalGameMode::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void ASurvivalGameMode::SetFailedMusic(bool bIsPlaying)
+{
+
+	if (AudioComponent != nullptr && bIsPlaying)
+	{
+		AudioComponent->Play();
+		AudioComponent->FadeIn(3);
+	}
+
+	if (AudioComponent != nullptr && !bIsPlaying)
+	{
+		AudioComponent->FadeOut(3, 0);
+	}
 }
 
 void ASurvivalGameMode::SetIsGameOver(bool bIsGameOver)

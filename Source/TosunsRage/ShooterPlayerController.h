@@ -27,6 +27,11 @@ private:
 	UUserWidget* HUD;
 
 	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> FadeWidgetClass;
+
+	UUserWidget* FadeWidget;
+
+	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
 	UUserWidget* GameOverWidget;

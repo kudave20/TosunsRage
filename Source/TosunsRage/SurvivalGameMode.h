@@ -21,6 +21,9 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable)
+	void SetFailedMusic(bool bIsPlaying);
+
 	void SetIsGameOver(bool bIsGameOver);
 
 private:
@@ -33,7 +36,12 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<ACharacter> BigTosun;
 
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* FailedMusic;
+
 	bool IsGameOver;
+
+	UAudioComponent* AudioComponent;
 
 	FTimerHandle TosunWaitHandle;
 	FTimerHandle BombTosunWaitHandle;

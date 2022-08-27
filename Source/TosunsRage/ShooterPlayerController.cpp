@@ -5,10 +5,22 @@
 #include "Blueprint/UserWidget.h"
 #include "SurvivalGameMode.h"
 #include "Kismet/GameplayStatics.h"
+#include "FadeWidget.h"
 
 void AShooterPlayerController::BeginPlay()
 {
     Super::BeginPlay();
+
+	FadeWidget = CreateWidget(this, FadeWidgetClass);
+
+	if (FadeWidget != nullptr)
+	{
+		FadeWidget->AddToViewport();
+
+		UFadeWidget* Widget = Cast<UFadeWidget>(FadeWidget);
+
+		if (Widget != nullptr) Widget->FadeIn();
+	}
 
     HUD = CreateWidget(this, HUDClass);
 
@@ -34,6 +46,11 @@ void AShooterPlayerController::GameOverSet()
 	
 	SetShowMouseCursor(true);
 
+	ASurvivalGameMode* SurvivalGameMode = GetWorld()->GetAuthGameMode<ASurvivalGameMode>();
+	SurvivalGameMode->SetFailedMusic(true);
+
 	UGameplayStatics::PlaySound2D(GetWorld(), MissionFailedSound);
 	UGameplayStatics::SetGamePaused(GetWorld(), true);
+
+	GetPawn()->SetTickableWhenPaused(true);
 }
