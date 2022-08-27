@@ -13,5 +13,42 @@ UCLASS()
 class TOSUNSRAGE_API UHUDWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
+protected:
+	virtual void NativeConstruct() override;
 	
+private:
+	UPROPERTY(meta = (BindWidget))
+	class UImage* CrossHairTop;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* CrossHairBottom;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* CrossHairRight;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* CrossHairLeft;
+
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* Health;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* MaxAmmo;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* Ammo;
+
+	void SetCrossHair();
+
+	void Hide();
+
+	UFUNCTION()
+	FText SetHealth();
+
+	UFUNCTION()
+	FText SetMaxAmmo();
+
+	UFUNCTION()
+	FText SetAmmo();
 };
