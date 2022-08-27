@@ -17,9 +17,22 @@ class TOSUNSRAGE_API AShooterPlayerController : public APlayerController
 protected:
 	virtual void BeginPlay() override;
 
+public:
+	virtual void GameHasEnded(class AActor* EndGameFocus = nullptr, bool bIsWinner = false) override;
+
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UUserWidget> HUDClass;
 
 	UUserWidget* HUD;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> GameOverWidgetClass;
+
+	UUserWidget* GameOverWidget;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* MissionFailedSound;
+
+	void GameOverSet();
 };

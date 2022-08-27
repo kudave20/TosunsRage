@@ -17,6 +17,11 @@ void ASurvivalGameMode::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ASurvivalGameMode::SetIsGameOver(bool bIsGameOver)
+{
+	IsGameOver = bIsGameOver;
+}
+
 void ASurvivalGameMode::SpawnTosun()
 {
 	if (IsGameOver)

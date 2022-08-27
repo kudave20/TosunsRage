@@ -21,6 +21,8 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	void SetIsGameOver(bool bIsGameOver);
+
 private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<ACharacter> Tosun;

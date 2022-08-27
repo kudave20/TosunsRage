@@ -133,12 +133,13 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	DamageToApply = FMath::Min(Health, DamageToApply);
 
 	Health -= DamageToApply;
 
-	if (Health > 0) UGameplayStatics::PlaySound2D(GetWorld(), HurtSound);
+	if (Health >= 0) UGameplayStatics::PlaySound2D(GetWorld(), HurtSound);
 
-	if (Health <= 0 && !IsDead) Die();
+	if (Health == 0 && !IsDead) Die();
 
 	return DamageToApply;
 }
@@ -288,9 +289,10 @@ void AShooterCharacter::StopShooting()
 
 void AShooterCharacter::Die()
 {
-	UE_LOG(LogTemp, Warning, TEXT("I'M DEAD!"));
-
 	IsDead = true;
+
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController != nullptr) PlayerController->GameHasEnded(nullptr, false);
 }
 
 void AShooterCharacter::Reload()
