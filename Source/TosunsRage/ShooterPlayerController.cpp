@@ -25,6 +25,10 @@ void AShooterPlayerController::BeginPlay()
     HUD = CreateWidget(this, HUDClass);
 
     if (HUD != nullptr) HUD->AddToViewport();
+
+	TimerWidget = CreateWidget(this, TimerWidgetClass);
+
+	if (TimerWidget != nullptr) TimerWidget->AddToViewport();
 }
 
 void AShooterPlayerController::GameHasEnded(class AActor* EndGameFocus, bool bIsWinner)
@@ -34,8 +38,35 @@ void AShooterPlayerController::GameHasEnded(class AActor* EndGameFocus, bool bIs
 	ASurvivalGameMode* SurvivalGameMode = GetWorld()->GetAuthGameMode<ASurvivalGameMode>();
 	SurvivalGameMode->SetIsGameOver(true);
 
-    FTimerHandle WaitHandle;
-    GetWorldTimerManager().SetTimer(WaitHandle, this, &AShooterPlayerController::GameOverSet, 1, false);
+	HUD->RemoveFromViewport();
+	TimerWidget->RemoveFromViewport();
+
+	// Victory
+	if (bIsWinner)
+	{
+		VictorySet();
+	}
+	// Lose
+	else
+	{
+		FTimerHandle WaitHandle;
+		GetWorldTimerManager().SetTimer(WaitHandle, this, &AShooterPlayerController::GameOverSet, 1, false);
+	}
+}
+
+void AShooterPlayerController::VictorySet()
+{
+	VictoryWidget = CreateWidget(this, VictoryWidgetClass);
+
+	if (VictoryWidget != nullptr) VictoryWidget->AddToViewport();
+
+	SetShowMouseCursor(true);
+
+	ASurvivalGameMode* SurvivalGameMode = GetWorld()->GetAuthGameMode<ASurvivalGameMode>();
+	SurvivalGameMode->SetVictoryMusic(true);
+
+	UGameplayStatics::PlaySound2D(GetWorld(), MissionAccomplishedSound);
+	UGameplayStatics::SetGamePaused(GetWorld(), true);
 }
 
 void AShooterPlayerController::GameOverSet()
@@ -51,6 +82,4 @@ void AShooterPlayerController::GameOverSet()
 
 	UGameplayStatics::PlaySound2D(GetWorld(), MissionFailedSound);
 	UGameplayStatics::SetGamePaused(GetWorld(), true);
-
-	GetPawn()->SetTickableWhenPaused(true);
 }

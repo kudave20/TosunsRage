@@ -98,11 +98,7 @@ void UGameOverWidget::LevelRetry()
 
 	APlayerController* PlayerController = GetOwningPlayer();
 
-	if (PlayerController != nullptr)
-	{
-		PlayerController->RestartLevel();
-		PlayerController->SetShowMouseCursor(false);
-	}
+	if (PlayerController != nullptr) PlayerController->RestartLevel();
 }
 
 void UGameOverWidget::ToMainMenu()

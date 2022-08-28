@@ -13,5 +13,7 @@ UCLASS()
 class TOSUNSRAGE_API ATosunsRageGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+protected:
+	virtual void BeginPlay() override;
 };

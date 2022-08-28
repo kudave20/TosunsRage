@@ -13,7 +13,8 @@ void ASurvivalGameMode::BeginPlay()
 	GetWorldTimerManager().SetTimer(BombTosunWaitHandle, this, &ASurvivalGameMode::SpawnBombTosun, 10, true, 1);
 	GetWorldTimerManager().SetTimer(BigTosunWaitHandle, this, &ASurvivalGameMode::SpawnBigTosun, 40, true, 1);
 
-	AudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), FailedMusic);
+	VictoryAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), VictoryMusic);
+	FailedAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), FailedMusic);
 }
 
 void ASurvivalGameMode::Tick(float DeltaTime)
@@ -21,18 +22,31 @@ void ASurvivalGameMode::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ASurvivalGameMode::SetFailedMusic(bool bIsPlaying)
+void ASurvivalGameMode::SetVictoryMusic(bool bIsPlaying)
 {
-
-	if (AudioComponent != nullptr && bIsPlaying)
+	if (VictoryAudioComponent != nullptr && bIsPlaying)
 	{
-		AudioComponent->Play();
-		AudioComponent->FadeIn(3);
+		VictoryAudioComponent->Play();
+		VictoryAudioComponent->FadeIn(3);
 	}
 
-	if (AudioComponent != nullptr && !bIsPlaying)
+	if (VictoryAudioComponent != nullptr && !bIsPlaying)
 	{
-		AudioComponent->FadeOut(3, 0);
+		VictoryAudioComponent->FadeOut(3, 0);
+	}
+}
+
+void ASurvivalGameMode::SetFailedMusic(bool bIsPlaying)
+{
+	if (FailedAudioComponent != nullptr && bIsPlaying)
+	{
+		FailedAudioComponent->Play();
+		FailedAudioComponent->FadeIn(3);
+	}
+
+	if (FailedAudioComponent != nullptr && !bIsPlaying)
+	{
+		FailedAudioComponent->FadeOut(3, 0);
 	}
 }
 

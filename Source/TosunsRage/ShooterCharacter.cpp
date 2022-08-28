@@ -292,7 +292,7 @@ void AShooterCharacter::Die()
 	IsDead = true;
 
 	APlayerController* PlayerController = GetController<APlayerController>();
-	if (PlayerController != nullptr) PlayerController->GameHasEnded(nullptr, false);
+	if (PlayerController != nullptr) PlayerController->GameHasEnded(this, false);
 }
 
 void AShooterCharacter::Reload()

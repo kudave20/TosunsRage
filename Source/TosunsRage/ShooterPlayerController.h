@@ -32,12 +32,27 @@ private:
 	UUserWidget* FadeWidget;
 
 	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> VictoryWidgetClass;
+
+	UUserWidget* VictoryWidget;
+
+	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
 
 	UUserWidget* GameOverWidget;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UUserWidget> TimerWidgetClass;
+
+	UUserWidget* TimerWidget;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* MissionAccomplishedSound;
+
 	UPROPERTY(EditAnywhere)
 	USoundBase* MissionFailedSound;
+
+	void VictorySet();
 
 	void GameOverSet();
 };
