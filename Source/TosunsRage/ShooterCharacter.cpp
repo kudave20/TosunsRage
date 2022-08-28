@@ -293,6 +293,9 @@ void AShooterCharacter::Die()
 
 	APlayerController* PlayerController = GetController<APlayerController>();
 	if (PlayerController != nullptr) PlayerController->GameHasEnded(this, false);
+
+	DetachFromControllerPendingDestroy();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AShooterCharacter::Reload()

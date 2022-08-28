@@ -28,7 +28,11 @@ void UHUDWidget::SetCrossHair()
 {
 	UCanvasPanelSlot* CanvasPanelSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(CrossHairTop);
 
-	float Speed = GetOwningPlayerPawn()->GetVelocity().Size();
+	APawn* Pawn = GetOwningPlayerPawn();
+
+	if (Pawn == nullptr) return;
+
+	float Speed = Pawn->GetVelocity().Size();
 	float YValue = 0;
 
 	if (CanvasPanelSlot != nullptr)
@@ -88,7 +92,11 @@ void UHUDWidget::Hide()
 
 FText UHUDWidget::SetHealth()
 {
-	float HealthValue = GetOwningPlayerPawn<AShooterCharacter>()->GetHealth();
+	AShooterCharacter* ShooterCharacter = GetOwningPlayerPawn<AShooterCharacter>();
+
+	if (ShooterCharacter == nullptr) return FText::AsNumber(0);
+
+	float HealthValue = ShooterCharacter->GetHealth();
 	FText HealthText = FText::AsNumber(HealthValue);
 
 	return HealthText;
@@ -96,7 +104,11 @@ FText UHUDWidget::SetHealth()
 
 FText UHUDWidget::SetMaxAmmo()
 {
-	AGun* CurrentGun = GetOwningPlayerPawn<AShooterCharacter>()->GetCurrentGun();
+	AShooterCharacter* ShooterCharacter = GetOwningPlayerPawn<AShooterCharacter>();
+
+	if (ShooterCharacter == nullptr) return FText::AsNumber(0);
+
+	AGun* CurrentGun = ShooterCharacter->GetCurrentGun();
 
 	if (CurrentGun != nullptr)
 	{
@@ -111,7 +123,11 @@ FText UHUDWidget::SetMaxAmmo()
 
 FText UHUDWidget::SetAmmo()
 {
-	AGun* CurrentGun = GetOwningPlayerPawn<AShooterCharacter>()->GetCurrentGun();
+	AShooterCharacter* ShooterCharacter = GetOwningPlayerPawn<AShooterCharacter>();
+
+	if (ShooterCharacter == nullptr) return FText::AsNumber(0);
+
+	AGun* CurrentGun = ShooterCharacter->GetCurrentGun();
 
 	if (CurrentGun != nullptr)
 	{
