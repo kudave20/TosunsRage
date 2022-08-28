@@ -43,6 +43,23 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	USoundBase* FailedMusic;
 
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* Starting;
+
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* MissionStart;
+
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* HalfWay;
+
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* AlmostDone;
+
+	UPROPERTY(EditDefaultsOnly)
+	USoundBase* GoGoGo;
+
+	int32 GoGoGoCount;
+
 	bool IsGameOver;
 
 	UAudioComponent* VictoryAudioComponent;
@@ -55,4 +72,10 @@ private:
 	void SpawnTosun();
 	void SpawnBombTosun();
 	void SpawnBigTosun();
+
+	void PlayStarting();
+	void PlayMissionStart();
+	void PlayHalfWay();
+	void PlayAlmostDone();
+	void PlayGoGoGo();
 };

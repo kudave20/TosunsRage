@@ -9,6 +9,8 @@ void ASurvivalGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	PlayStarting();
+
 	GetWorldTimerManager().SetTimer(TosunWaitHandle, this, &ASurvivalGameMode::SpawnTosun, 10, true, 1);
 	GetWorldTimerManager().SetTimer(BombTosunWaitHandle, this, &ASurvivalGameMode::SpawnBombTosun, 10, true, 1);
 	GetWorldTimerManager().SetTimer(BigTosunWaitHandle, this, &ASurvivalGameMode::SpawnBigTosun, 40, true, 1);
@@ -113,4 +115,48 @@ void ASurvivalGameMode::SpawnBigTosun()
 	Location.Z = 256;
 
 	GetWorld()->SpawnActor<AActor>(BigTosun, Location, Rotation);
+}
+
+void ASurvivalGameMode::PlayStarting()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), Starting);
+
+	FTimerHandle WaitHandle;
+	GetWorldTimerManager().SetTimer(WaitHandle, this, &ASurvivalGameMode::PlayMissionStart, 2, false);
+}
+
+void ASurvivalGameMode::PlayMissionStart()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), MissionStart);
+
+	FTimerHandle WaitHandle;
+	GetWorldTimerManager().SetTimer(WaitHandle, this, &ASurvivalGameMode::PlayHalfWay, FMath::RandRange(59.f, 61.f), false);
+}
+
+void ASurvivalGameMode::PlayHalfWay()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), HalfWay);
+
+	FTimerHandle WaitHandle;
+	GetWorldTimerManager().SetTimer(WaitHandle, this, &ASurvivalGameMode::PlayAlmostDone, FMath::RandRange(21.f, 23.f), false);
+}
+
+void ASurvivalGameMode::PlayAlmostDone()
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), AlmostDone);
+
+	FTimerHandle WaitHandle;
+	GetWorldTimerManager().SetTimer(WaitHandle, this, &ASurvivalGameMode::PlayGoGoGo, FMath::RandRange(18.f, 20.f), false);
+}
+
+void ASurvivalGameMode::PlayGoGoGo()
+{
+	if (GoGoGoCount >= 3) return;
+
+	UGameplayStatics::PlaySound2D(GetWorld(), GoGoGo);
+
+	FTimerHandle WaitHandle;
+	GetWorldTimerManager().SetTimer(WaitHandle, this, &ASurvivalGameMode::PlayGoGoGo, 7, false);
+
+	GoGoGoCount++;
 }

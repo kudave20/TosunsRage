@@ -24,7 +24,10 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Second;
 
+	UPROPERTY(EditDefaultsOnly)
 	int32 Min = 3;
+
+	UPROPERTY(EditDefaultsOnly)
 	int32 Sec = 0;
 
 	void SetCurrentTime();
