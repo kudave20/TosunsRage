@@ -42,4 +42,6 @@ private:
 	TSubclassOf<AActor> SparkClass;
 
 	AActor* Spark;
+
+	bool IsCrashed;
 };

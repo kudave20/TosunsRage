@@ -41,6 +41,8 @@ float AFluorescent::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 {
 	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	if (IsCrashed) return DamageToApply;
+
 	Spark = GetWorld()->SpawnActor<AActor>(SparkClass, Light->GetComponentLocation(), FRotator(0));
 
 	FTimerHandle WaitHandle;
@@ -51,6 +53,8 @@ float AFluorescent::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 
 	Light->SetVisibility(false);
 	Mesh->SetMaterial(1, PlasticSet);
+
+	IsCrashed = true;
 
 	return DamageToApply;
 }

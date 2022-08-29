@@ -88,7 +88,9 @@ void AGun::SetMaxAmmo(int Value)
 void AGun::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
+	RecoilTimeLine.TickTimeline(DeltaTime);
+	RecoveryTimeLine.TickTimeline(DeltaTime);
 }
 
 void AGun::PullTrigger()
@@ -147,21 +149,8 @@ void AGun::PullTrigger()
 	UAnimInstance* AnimInstance = OwnerCharacter->GetArms()->GetAnimInstance();
 	if (AnimInstance == nullptr) return;
 	
-	// Recoil
-	if (OwnerCharacter->GetIsAiming())
-	{
-		OwnerCharacter->AddControllerPitchInput(FMath::RandRange(MinPitchADSRecoil, MaxPitchADSRecoil));
-		OwnerCharacter->AddControllerYawInput(FMath::RandRange(MinYawADSRecoil, MaxYawADSRecoil));
-
-		AnimInstance->Montage_Play(ArmsADSShootAnim);
-	}
-	else
-	{
-		OwnerCharacter->AddControllerPitchInput(FMath::RandRange(MinPitchRecoil, MaxPitchRecoil));
-		OwnerCharacter->AddControllerYawInput(FMath::RandRange(MinYawRecoil, MaxYawRecoil));
-
-		AnimInstance->Montage_Play(ArmsShootAnim);
-	}
+	if (OwnerCharacter->GetIsAiming()) AnimInstance->Montage_Play(ArmsADSShootAnim);
+	else AnimInstance->Montage_Play(ArmsShootAnim);
 
 	Mesh->PlayAnimation(ShootAnim, false);
 
@@ -177,6 +166,64 @@ void AGun::PullTrigger()
 			Flame->SetVisibility(false);
 			SetNextFlame();
 		}, 0.05f, false);
+}
+
+void AGun::RecoilStart()
+{
+	APawn* Pawn = GetOwner<APawn>();
+	if (Pawn == nullptr) return;
+
+	AController* Controller = Pawn->GetController();
+	if (Controller == nullptr) return;
+
+	RecoilStartRotation = Controller->GetControlRotation();
+	RecoilDeltaRotation = FRotator(0);
+
+	if (RecoilCurveVector != nullptr)
+	{
+		if (!RecoilTimeLineCallback.IsBound())
+		{
+			RecoilTimeLineCallback.BindUFunction(this, FName("Recoil"));
+
+			RecoilTimeLine.AddInterpVector(RecoilCurveVector, RecoilTimeLineCallback);
+			RecoilTimeLine.SetLooping(false);
+		}
+
+		RecoilTimeLine.PlayFromStart();
+	}
+}
+
+void AGun::RecoveryStart()
+{
+	DeltaRotation = FRotator(0);
+	RecoveryDeltaRotation = FRotator(0);
+
+	RecoilTimeLine.Stop();
+
+	APawn* Pawn = GetOwner<APawn>();
+	if (Pawn == nullptr) return;
+
+	AController* Controller = Pawn->GetController();
+	if (Controller == nullptr) return;
+
+	RecoveryStartRotation = Controller->GetControlRotation();
+	FRotator Rotation = RecoveryStartRotation - RecoilStartRotation;
+
+	if (RecoilDeltaRotation.Pitch >= FMath::Abs(Rotation.Pitch)) RecoilDeltaRotation.Pitch = FMath::Abs(Rotation.Pitch);
+	else RecoilDeltaRotation.Pitch = 0;
+
+	if (RecoveryCurveFloat != nullptr)
+	{
+		if (!RecoveryTimeLineCallback.IsBound())
+		{
+			RecoveryTimeLineCallback.BindUFunction(this, FName("Recovery"));
+
+			RecoveryTimeLine.AddInterpFloat(RecoveryCurveFloat, RecoveryTimeLineCallback);
+			RecoveryTimeLine.SetLooping(false);
+		}
+
+		RecoveryTimeLine.PlayFromStart();
+	}
 }
 
 void AGun::Reload()
@@ -204,6 +251,57 @@ void AGun::Reload()
 
 			OwnerCharacter->SetIsReloading(false);
 		}, ReloadTime, false);
+}
+
+void AGun::Recoil(FVector Value)
+{
+	if (Ammo == 0)
+	{
+		AShooterCharacter* Player = GetOwner<AShooterCharacter>();
+		if (Player != nullptr) Player->SetIsRecovering(true);
+
+		RecoveryStart();
+
+		if (Player != nullptr) Player->SetIsRecovering(false);
+		return;
+	}
+
+	APawn* Pawn = GetOwner<APawn>();
+	if (Pawn == nullptr) return;
+
+	AController* Controller = Pawn->GetController();
+
+	UE_LOG(LogTemp, Warning, TEXT("%f"), RecoilTimeLine.GetPlaybackPosition());
+
+	if (Controller != nullptr)
+	{
+		FRotator Rotation;
+		Rotation.Pitch = Value.Y;
+		Rotation.Yaw = Value.Z;
+		Rotation.Roll = 0;
+
+		Controller->SetControlRotation(Controller->GetControlRotation() - DeltaRotation + Rotation);
+
+		RecoilDeltaRotation += Rotation - DeltaRotation;
+		DeltaRotation = Rotation;
+	}
+
+	if (!IsInFullAuto) RecoilTimeLine.Stop();
+}
+
+void AGun::Recovery(float Value)
+{
+	APawn* Pawn = GetOwner<APawn>();
+	if (Pawn == nullptr) return;
+
+	AController* Controller = Pawn->GetController();
+	if (Controller == nullptr) return;
+
+	FRotator Rotation = FMath::Lerp<FRotator, float>(RecoveryStartRotation, RecoveryStartRotation - RecoilDeltaRotation, Value) - RecoveryStartRotation;
+
+	Controller->SetControlRotation(Controller->GetControlRotation() - RecoveryDeltaRotation + Rotation);
+
+	RecoveryDeltaRotation = Rotation;
 }
 
 void AGun::SetNextFlame()

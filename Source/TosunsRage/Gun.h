@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/TimelineComponent.h"
 #include "Gun.generated.h"
 
 UENUM(BlueprintType)
@@ -53,6 +54,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void PullTrigger();
+
+	void RecoilStart();
+
+	void RecoveryStart();
 
 	void Reload();
 
@@ -111,29 +116,17 @@ private:
 	UPROPERTY(EditAnywhere)
 	float FireRate;
 
-	UPROPERTY(EditAnywhere)
-	float MinPitchRecoil;
+	UPROPERTY(EditDefaultsOnly)
+	UCurveVector* RecoilCurveVector;
 
-	UPROPERTY(EditAnywhere)
-	float MaxPitchRecoil;
+	UPROPERTY(EditDefaultsOnly)
+	UCurveFloat* RecoveryCurveFloat;
 
-	UPROPERTY(EditAnywhere)
-	float MinYawRecoil;
+	FTimeline RecoilTimeLine;
+	FTimeline RecoveryTimeLine;
 
-	UPROPERTY(EditAnywhere)
-	float MaxYawRecoil;
-
-	UPROPERTY(EditAnywhere)
-	float MinPitchADSRecoil;
-
-	UPROPERTY(EditAnywhere)
-	float MaxPitchADSRecoil;
-
-	UPROPERTY(EditAnywhere)
-	float MinYawADSRecoil;
-
-	UPROPERTY(EditAnywhere)
-	float MaxYawADSRecoil;
+	FOnTimelineVector RecoilTimeLineCallback;
+	FOnTimelineFloat RecoveryTimeLineCallback;
 
 	UPROPERTY(EditAnywhere)
 	bool IsInFullAuto;
@@ -143,6 +136,20 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<APickUp> PickUpClass;
+
+	FTimerHandle RecoveryWaitHandle;
+
+	FRotator RecoilStartRotation;
+	FRotator DeltaRotation;
+	FRotator RecoilDeltaRotation;
+	FRotator RecoveryStartRotation;
+	FRotator RecoveryDeltaRotation;
+
+	UFUNCTION()
+	void Recoil(FVector Value);
+
+	UFUNCTION()
+	void Recovery(float Value);
 
 	void SetNextFlame();
 };

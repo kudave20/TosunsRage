@@ -41,6 +41,8 @@ float ALamp::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEve
 {
 	float DamageToApply = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	if (IsCrashed) return DamageToApply;
+
 	Spark = GetWorld()->SpawnActor<AActor>(SparkClass, Light->GetComponentLocation() - FVector(0, 0, 15), FRotator(0));
 
 	FTimerHandle WaitHandle;
@@ -51,6 +53,8 @@ float ALamp::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEve
 
 	Light->SetVisibility(false);
 	Mesh->SetMaterial(1, PlasticSet);
+
+	IsCrashed = true;
 
 	return DamageToApply;
 }

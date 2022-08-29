@@ -100,6 +100,11 @@ void AShooterCharacter::SetIsAiming(bool bIsAiming)
 	IsAiming = bIsAiming;
 }
 
+void AShooterCharacter::SetIsRecovering(bool bIsRecovering)
+{
+	IsRecovering = bIsRecovering;
+}
+
 // Called every frame
 void AShooterCharacter::Tick(float DeltaTime)
 {
@@ -245,46 +250,78 @@ void AShooterCharacter::LookRightRate(float AxisValue)
 
 void AShooterCharacter::Shoot()
 {
+	if (IsReloading) return;
+	
 	switch (EquippedGunSlot)
 	{
 		case EGunSlot::PRIMARY:
 			if (PrimaryGun != nullptr && PrimaryGun->GetIsInFullAuto())
 			{
-				GetWorldTimerManager().SetTimer(ShootWaitHandle, this, &AShooterCharacter::PullTrigger, PrimaryGun->GetFireRate(), true, 0);
+				GetWorldTimerManager().SetTimer(ShootWaitHandle, this, &AShooterCharacter::PullPrimaryGunTrigger, PrimaryGun->GetFireRate(), true, 0);
 			}
 
 			if (PrimaryGun != nullptr && !PrimaryGun->GetIsInFullAuto()) PrimaryGun->PullTrigger();
+
+			if (PrimaryGun != nullptr && !IsReloading && PrimaryGun->GetAmmo() != 0)
+			{
+				PrimaryGun->RecoilStart();
+				bRecoil = true;
+				IsShooting = true;
+			}
 
 			break;
 		case EGunSlot::SECONDARY:
 			if (SecondaryGun != nullptr && SecondaryGun->GetIsInFullAuto())
 			{
-				FTimerHandle WaitHandle;
-				GetWorldTimerManager().SetTimer(ShootWaitHandle, this, &AShooterCharacter::PullTrigger, SecondaryGun->GetFireRate(), true, 0);
+				GetWorldTimerManager().SetTimer(ShootWaitHandle, this, &AShooterCharacter::PullSecondaryGunTrigger, SecondaryGun->GetFireRate(), true, 0);
 			}
 
 			if (SecondaryGun != nullptr && !SecondaryGun->GetIsInFullAuto()) SecondaryGun->PullTrigger();
+
+			if (SecondaryGun != nullptr && !IsReloading && SecondaryGun->GetAmmo() != 0)
+			{
+				SecondaryGun->RecoilStart();
+				bRecoil = true;
+				IsShooting = true;
+			}
 
 			break;
 	}
 }
 
-void AShooterCharacter::PullTrigger()
+void AShooterCharacter::PullPrimaryGunTrigger()
 {
-	switch (EquippedGunSlot)
-	{
-		case EGunSlot::PRIMARY:
-			PrimaryGun->PullTrigger();
-			break;
-		case EGunSlot::SECONDARY:
-			SecondaryGun->PullTrigger();
-			break;
-	}
+	PrimaryGun->PullTrigger();
+}
+
+void AShooterCharacter::PullSecondaryGunTrigger()
+{
+	SecondaryGun->PullTrigger();
 }
 
 void AShooterCharacter::StopShooting()
 {
 	GetWorldTimerManager().ClearTimer(ShootWaitHandle);
+
+	switch (EquippedGunSlot)
+	{
+		case EGunSlot::PRIMARY:
+			if (PrimaryGun != nullptr && !IsRecovering && bRecoil && (PrimaryGun->GetAmmo() != 0 || IsShooting))
+			{
+				PrimaryGun->RecoveryStart();
+				bRecoil = false;
+			}
+			break;
+		case EGunSlot::SECONDARY:
+			if (SecondaryGun != nullptr && !IsRecovering && bRecoil && (SecondaryGun->GetAmmo() != 0 || IsShooting))
+			{
+				SecondaryGun->RecoveryStart();
+				bRecoil = false;
+			}
+			break;
+	}
+
+	IsShooting = false;
 }
 
 void AShooterCharacter::Die()

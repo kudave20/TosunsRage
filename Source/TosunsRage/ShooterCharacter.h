@@ -55,6 +55,8 @@ public:
 
 	void SetIsAiming(bool bIsAiming);
 
+	void SetIsRecovering(bool bIsRecovering);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -91,8 +93,12 @@ private:
 	bool IsDead;
 
 	bool IsAiming;
+	bool IsShooting;
 	bool IsReloading;
 	bool IsSwitchingToPrimary;
+
+	bool bRecoil;
+	bool IsRecovering;
 
 	UPROPERTY(EditAnywhere)
 	USoundBase* HurtSound;
@@ -117,6 +123,7 @@ private:
 	FTimeline AimTimeLine;
 
 	FTimerHandle ShootWaitHandle;
+	FTimerHandle RecoilWaitHandle;
 
 	void MoveForward(float AxisValue);
 	void MoveRight(float AxisValue);
@@ -124,7 +131,8 @@ private:
 	void LookRightRate(float AxisValue);
 
 	void Shoot();
-	void PullTrigger();
+	void PullPrimaryGunTrigger();
+	void PullSecondaryGunTrigger();
 	void StopShooting();
 
 	void Die();
