@@ -183,6 +183,19 @@ void AShooterCharacter::Equip(EGunSlot GunSlot, EGunType GunType, TSubclassOf<AG
 				SecondaryGun->GetSuppressor()->SetVisibility(false);
 			}
 
+			if (IsAiming)
+			{
+				IsEquippingPrimary = true;
+
+				FTimerHandle WaitHandle;
+				GetWorldTimerManager().SetTimer(WaitHandle, [&]()
+					{
+						IsEquippingPrimary = false;
+					}, 0.1f, false);
+
+				AimTimeLineSet();
+			}
+
 			break;
 		case EGunSlot::SECONDARY:
 			SecondaryGun = GetWorld()->SpawnActor<AGun>(GunClass);
@@ -194,6 +207,19 @@ void AShooterCharacter::Equip(EGunSlot GunSlot, EGunType GunType, TSubclassOf<AG
 			{
 				PrimaryGun->GetMesh()->SetVisibility(false);
 				PrimaryGun->GetSuppressor()->SetVisibility(false);
+			}
+
+			if (IsAiming)
+			{
+				IsEquippingSecondary = true;
+
+				FTimerHandle WaitHandle;
+				GetWorldTimerManager().SetTimer(WaitHandle, [&]()
+					{
+						IsEquippingSecondary = false;
+					}, 0.1f, false);
+
+				AimTimeLineSet();
 			}
 
 			break;
@@ -378,7 +404,7 @@ void AShooterCharacter::SetAimLocation(float Value)
 	FVector NewArmLocation = FMath::Lerp<FVector, float>(FVector(1.6f, 7.8f, -23.6775f), FVector(-8, 0, -16), Value);
 	Arms->SetRelativeLocation(NewArmLocation);
 
-	if (EquippedGunSlot == EGunSlot::PRIMARY && !IsSwitchingToPrimary)
+	if ((EquippedGunSlot == EGunSlot::PRIMARY || IsEquippingSecondary) && !IsSwitchingToPrimary && !IsEquippingPrimary)
 	{
 		float NewCameraFOV = FMath::Lerp<float, float>(90, 60, Value);
 		Camera->SetFieldOfView(NewCameraFOV);
@@ -490,6 +516,8 @@ void AShooterCharacter::Switch()
 void AShooterCharacter::UnEquip()
 {
 	if (IsReloading) return;
+	
+	if (IsAiming) AimTimeLineSet();
 
 	float RandomFloat = FMath::RandRange(-180.f, 180.f);
 

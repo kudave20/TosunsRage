@@ -99,6 +99,8 @@ private:
 	bool IsShooting;
 	bool IsReloading;
 	bool IsSwitchingToPrimary;
+	bool IsEquippingPrimary;
+	bool IsEquippingSecondary;
 
 	bool bRecoil;
 	bool IsRecovering;
