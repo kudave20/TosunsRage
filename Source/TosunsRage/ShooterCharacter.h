@@ -81,6 +81,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* ThrowPoint;
 
+	UPROPERTY(VisibleAnywhere)
+	class USpotLightComponent* Flash;
+
 	UPROPERTY(EditAnywhere)
 	float RotationRate = 70;
 
@@ -149,4 +152,6 @@ private:
 	void Switch();
 
 	void UnEquip();
+
+	void ToggleFlash();
 };

@@ -261,8 +261,6 @@ void AGun::Recoil(FVector Value)
 		if (Player != nullptr) Player->SetIsRecovering(true);
 
 		RecoveryStart();
-
-		if (Player != nullptr) Player->SetIsRecovering(false);
 		return;
 	}
 
@@ -270,8 +268,6 @@ void AGun::Recoil(FVector Value)
 	if (Pawn == nullptr) return;
 
 	AController* Controller = Pawn->GetController();
-
-	UE_LOG(LogTemp, Warning, TEXT("%f"), RecoilTimeLine.GetPlaybackPosition());
 
 	if (Controller != nullptr)
 	{

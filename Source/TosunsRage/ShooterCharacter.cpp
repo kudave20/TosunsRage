@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "PickUp.h"
+#include "Components/SpotLightComponent.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter()
@@ -24,6 +25,9 @@ AShooterCharacter::AShooterCharacter()
 
 	ThrowPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ThrowPoint"));
 	ThrowPoint->SetupAttachment(Camera);
+
+	Flash = CreateDefaultSubobject<USpotLightComponent>(TEXT("Flash"));
+	Flash->SetupAttachment(Camera);
 }
 
 // Called when the game starts or when spawned
@@ -133,6 +137,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("Switch"), EInputEvent::IE_Pressed, this, &AShooterCharacter::Switch);
 	PlayerInputComponent->BindAction(TEXT("EquipPrimary"), EInputEvent::IE_Pressed, this, &AShooterCharacter::EquipPrimary);
 	PlayerInputComponent->BindAction(TEXT("EquipSecondary"), EInputEvent::IE_Pressed, this, &AShooterCharacter::EquipSecondary);
+	PlayerInputComponent->BindAction(TEXT("ToggleFlash"), EInputEvent::IE_Pressed, this, &AShooterCharacter::ToggleFlash);
 }
 
 float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
@@ -321,7 +326,8 @@ void AShooterCharacter::StopShooting()
 			break;
 	}
 
-	IsShooting = false;
+	if (IsRecovering) IsRecovering = false;
+	if (IsShooting) IsShooting = false;
 }
 
 void AShooterCharacter::Die()
@@ -520,4 +526,10 @@ void AShooterCharacter::UnEquip()
 	Arms->SetVisibility(false);
 
 	IsAiming = false;
+}
+
+void AShooterCharacter::ToggleFlash()
+{
+	if (Flash->IsVisible()) Flash->SetVisibility(false);
+	else Flash->SetVisibility(true);
 }
