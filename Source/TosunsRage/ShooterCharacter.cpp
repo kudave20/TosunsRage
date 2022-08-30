@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PickUp.h"
 #include "Components/SpotLightComponent.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter()
@@ -115,6 +116,7 @@ void AShooterCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimTimeLine.TickTimeline(DeltaTime);
+	VignetteTimeLine.TickTimeline(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -146,8 +148,20 @@ float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent cons
 	DamageToApply = FMath::Min(Health, DamageToApply);
 
 	Health -= DamageToApply;
+	
+	UGameplayStatics::PlaySound2D(GetWorld(), HurtSound);
+	
+	if (VignetteCurveFloat != nullptr)
+	{
+		FOnTimelineFloat TimeLineCallback;
 
-	if (Health >= 0) UGameplayStatics::PlaySound2D(GetWorld(), HurtSound);
+		TimeLineCallback.BindUFunction(this, FName("SetVignette"));
+
+		VignetteTimeLine.AddInterpFloat(VignetteCurveFloat, TimeLineCallback);
+		VignetteTimeLine.SetLooping(false);
+		
+		VignetteTimeLine.PlayFromStart();
+	}
 
 	if (Health == 0 && !IsDead) Die();
 
@@ -409,6 +423,13 @@ void AShooterCharacter::SetAimLocation(float Value)
 		float NewCameraFOV = FMath::Lerp<float, float>(90, 60, Value);
 		Camera->SetFieldOfView(NewCameraFOV);
 	}
+}
+
+void AShooterCharacter::SetVignette(float Value)
+{
+	UMaterialParameterCollectionInstance* Instance = GetWorld()->GetParameterCollectionInstance(VignetteMPC);
+
+	Instance->SetScalarParameterValue("VignetteAmount", Value);
 }
 
 void AShooterCharacter::EquipPrimary()

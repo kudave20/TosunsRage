@@ -125,7 +125,14 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	UCurveFloat* AimCurveFloat;
 
+	UPROPERTY(EditDefaultsOnly)
+	UCurveFloat* VignetteCurveFloat;
+
+	UPROPERTY(EditDefaultsOnly)
+	UMaterialParameterCollection* VignetteMPC;
+
 	FTimeline AimTimeLine;
+	FTimeline VignetteTimeLine;
 
 	FTimerHandle ShootWaitHandle;
 	FTimerHandle RecoilWaitHandle;
@@ -147,6 +154,9 @@ private:
 
 	UFUNCTION()
 	void SetAimLocation(float Value);
+
+	UFUNCTION()
+	void SetVignette(float Value);
 
 	void EquipPrimary();
 	void EquipSecondary();
