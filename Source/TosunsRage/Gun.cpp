@@ -119,6 +119,13 @@ void AGun::PullTrigger()
 	UGameplayStatics::SpawnSoundAttached(GunSound, Mesh, TEXT("MuzzleFlashSocket"));
 
 	FVector End = Location + Rotation.Vector() * MaxRange;
+
+	if (!OwnerCharacter->GetIsAiming())
+	{
+		FVector RandomVector(FMath::RandRange(-BulletSpread, BulletSpread), FMath::RandRange(-BulletSpread, BulletSpread), FMath::RandRange(-BulletSpread, BulletSpread));
+		End += RandomVector;
+	}
+
 	FHitResult Hit;
 	FCollisionQueryParams Params;
 

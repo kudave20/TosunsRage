@@ -102,7 +102,7 @@ private:
 	UAnimMontage* ShootAnim;
 
 	UPROPERTY(EditAnywhere)
-	float MaxRange = 100000;
+	float MaxRange = 20000;
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 10;
@@ -115,6 +115,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float FireRate;
+
+	UPROPERTY(EditAnywhere)
+	float BulletSpread = 2000;
 
 	UPROPERTY(EditDefaultsOnly)
 	UCurveVector* RecoilCurveVector;
