@@ -9,6 +9,10 @@ void ASurvivalGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	if (PlayerController != nullptr) PlayerController->SetShowMouseCursor(false);
+
 	PlayStarting();
 
 	GetWorldTimerManager().SetTimer(TosunWaitHandle, this, &ASurvivalGameMode::SpawnTosun, 10, true, 1);

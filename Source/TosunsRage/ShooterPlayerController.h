@@ -21,29 +21,34 @@ public:
 	virtual void GameHasEnded(class AActor* EndGameFocus = nullptr, bool bIsWinner = false) override;
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UUserWidget> HUDClass;
 
+	UPROPERTY()
 	UUserWidget* HUD;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> FadeWidgetClass;
 
+	UPROPERTY()
 	UUserWidget* FadeWidget;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> VictoryWidgetClass;
 
+	UPROPERTY()
 	UUserWidget* VictoryWidget;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> GameOverWidgetClass;
-
+	
+	UPROPERTY()
 	UUserWidget* GameOverWidget;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UUserWidget> TimerWidgetClass;
 
+	UPROPERTY()
 	UUserWidget* TimerWidget;
 
 	UPROPERTY(EditAnywhere)

@@ -30,7 +30,7 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	int32 Sec = 0;
 
-	void SetCurrentTime();
+	void SetCurrentTimer();
 
 	UFUNCTION()
 	FText SetMinute();

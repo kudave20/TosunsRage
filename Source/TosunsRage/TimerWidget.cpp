@@ -10,13 +10,13 @@ void UTimerWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	FTimerHandle WaitHandle;
-	GetWorld()->GetTimerManager().SetTimer(WaitHandle, this, &UTimerWidget::SetCurrentTime, 1, true);
+	GetWorld()->GetTimerManager().SetTimer(WaitHandle, this, &UTimerWidget::SetCurrentTimer, 1, true);
 
 	Minute->TextDelegate.BindUFunction(this, "SetMinute");
 	Second->TextDelegate.BindUFunction(this, "SetSecond");
 }
 
-void UTimerWidget::SetCurrentTime()
+void UTimerWidget::SetCurrentTimer()
 {
 	if (Sec == 0)
 	{
@@ -37,8 +37,13 @@ void UTimerWidget::SetCurrentTime()
 
 FText UTimerWidget::SetMinute()
 {
-	FString String = TEXT("0") + FString::FromInt(Min);
-	return FText::FromString(String);
+	if (Min < 10)
+	{
+		FString String = TEXT("0") + FString::FromInt(Min);
+		return FText::FromString(String);
+	}
+
+	return FText::AsNumber(Min);
 }
 
 FText UTimerWidget::SetSecond()
