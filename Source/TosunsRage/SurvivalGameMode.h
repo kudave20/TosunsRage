@@ -62,6 +62,9 @@ private:
 
 	bool IsGameOver;
 
+	TArray<FVector> TosunSpawnPoints;
+	TArray<FVector> BombTosunSpawnPoints;
+
 	UAudioComponent* VictoryAudioComponent;
 	UAudioComponent* FailedAudioComponent;
 

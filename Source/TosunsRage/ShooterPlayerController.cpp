@@ -29,6 +29,8 @@ void AShooterPlayerController::BeginPlay()
 	TimerWidget = CreateWidget(this, TimerWidgetClass);
 
 	if (TimerWidget != nullptr) TimerWidget->AddToViewport();
+
+	SetShowMouseCursor(false);
 }
 
 void AShooterPlayerController::GameHasEnded(class AActor* EndGameFocus, bool bIsWinner)

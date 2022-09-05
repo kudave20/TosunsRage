@@ -9,18 +9,22 @@ void ASurvivalGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-
-	if (PlayerController != nullptr) PlayerController->SetShowMouseCursor(false);
-
 	PlayStarting();
 
-	GetWorldTimerManager().SetTimer(TosunWaitHandle, this, &ASurvivalGameMode::SpawnTosun, 10, true, 1);
-	GetWorldTimerManager().SetTimer(BombTosunWaitHandle, this, &ASurvivalGameMode::SpawnBombTosun, 10, true, 1);
-	GetWorldTimerManager().SetTimer(BigTosunWaitHandle, this, &ASurvivalGameMode::SpawnBigTosun, 40, true, 1);
+	GetWorldTimerManager().SetTimer(TosunWaitHandle, this, &ASurvivalGameMode::SpawnTosun, 10, true, 3);
+	GetWorldTimerManager().SetTimer(BombTosunWaitHandle, this, &ASurvivalGameMode::SpawnBombTosun, 10, true, 3);
+	GetWorldTimerManager().SetTimer(BigTosunWaitHandle, this, &ASurvivalGameMode::SpawnBigTosun, 40, true, 40);
 
 	VictoryAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), VictoryMusic);
 	FailedAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), FailedMusic);
+
+	TosunSpawnPoints.Emplace(FVector(-221, 555, 691));
+	TosunSpawnPoints.Emplace(FVector(-1270, 150, 691));
+	TosunSpawnPoints.Emplace(FVector(-380, -210, 691));
+
+	BombTosunSpawnPoints.Emplace(FVector(-220, -670, 691));
+	BombTosunSpawnPoints.Emplace(FVector(220, 260, 691));
+	BombTosunSpawnPoints.Emplace(FVector(-1350, 680, 691));
 }
 
 void ASurvivalGameMode::Tick(float DeltaTime)
@@ -69,9 +73,22 @@ void ASurvivalGameMode::SpawnTosun()
 		return;
 	}
 
-	// float X = FMath::RandRange(-1420.f, 380.f);
-	// float Y = FMath::RandRange(-350.f, 750.f);
-	FVector Location(-130, -260, 691);
+	TArray<FVector> SpawnPoints = TosunSpawnPoints;
+	int32 RandomInt = FMath::RandRange(0, SpawnPoints.Num() - 1);
+
+	APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (Pawn == nullptr) return;
+
+	while ((Pawn->GetActorLocation() - SpawnPoints[RandomInt]).Size() <= 500)
+	{
+		SpawnPoints.RemoveAt(RandomInt);
+
+		if (SpawnPoints.Num() == 0) return;
+
+		RandomInt = FMath::RandRange(0, SpawnPoints.Num() - 1);
+	}
+
+	FVector Location = SpawnPoints[RandomInt];
 	FRotator Rotation;
 
 	GetWorld()->SpawnActor<AActor>(Tosun, Location, Rotation);
@@ -89,9 +106,22 @@ void ASurvivalGameMode::SpawnBombTosun()
 		return;
 	}
 
-	// float X = FMath::RandRange(-1420.f, 380.f);
-	// float Y = FMath::RandRange(-350.f, 750.f);
-	FVector Location(-220, -670, 691);
+	TArray<FVector> SpawnPoints = BombTosunSpawnPoints;
+	int32 RandomInt = FMath::RandRange(0, SpawnPoints.Num() - 1);
+
+	APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (Pawn == nullptr) return;
+
+	while ((Pawn->GetActorLocation() - SpawnPoints[RandomInt]).Size() <= 500)
+	{
+		SpawnPoints.RemoveAt(RandomInt);
+
+		if (SpawnPoints.Num() == 0) return;
+
+		RandomInt = FMath::RandRange(0, SpawnPoints.Num() - 1);
+	}
+
+	FVector Location = SpawnPoints[RandomInt];
 	FRotator Rotation;
 
 	GetWorld()->SpawnActor<AActor>(BombTosun, Location, Rotation);
@@ -109,9 +139,22 @@ void ASurvivalGameMode::SpawnBigTosun()
 		return;
 	}
 
-	// float X = FMath::RandRange(-1420.f, 380.f);
-	// float Y = FMath::RandRange(-350.f, 750.f);
-	FVector Location(-1240, 150, 691);
+	TArray<FVector> SpawnPoints = TosunSpawnPoints;
+	int32 RandomInt = FMath::RandRange(0, SpawnPoints.Num() - 1);
+
+	APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (Pawn == nullptr) return;
+
+	while ((Pawn->GetActorLocation() - SpawnPoints[RandomInt]).Size() <= 500)
+	{
+		SpawnPoints.RemoveAt(RandomInt);
+
+		if (SpawnPoints.Num() == 0) return;
+
+		RandomInt = FMath::RandRange(0, SpawnPoints.Num() - 1);
+	}
+
+	FVector Location = SpawnPoints[RandomInt];
 	FRotator Rotation;
 
 	GetWorld()->SpawnActor<AActor>(BigTosun, Location, Rotation);
