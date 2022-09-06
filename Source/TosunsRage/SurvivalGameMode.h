@@ -19,8 +19,6 @@ protected:
 	virtual void BeginPlay() override;
 	
 public:
-	virtual void Tick(float DeltaTime) override;
-
 	void SetVictoryMusic(bool bIsPlaying);
 
 	void SetFailedMusic(bool bIsPlaying);
@@ -36,6 +34,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<ACharacter> BigTosun;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> AK74PickUp;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> MP5PickUp;
 
 	UPROPERTY(EditDefaultsOnly)
 	USoundBase* VictoryMusic;
@@ -58,12 +62,21 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	USoundBase* GoGoGo;
 
+	UPROPERTY(EditAnywhere)
+	TArray<FVector> TosunSpawnPoints;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FVector> BombTosunSpawnPoints;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FVector> AK74SpawnPoints;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FVector> MP5SpawnPoints;
+
 	int32 GoGoGoCount;
 
 	bool IsGameOver;
-
-	TArray<FVector> TosunSpawnPoints;
-	TArray<FVector> BombTosunSpawnPoints;
 
 	UAudioComponent* VictoryAudioComponent;
 	UAudioComponent* FailedAudioComponent;
@@ -72,9 +85,15 @@ private:
 	FTimerHandle BombTosunWaitHandle;
 	FTimerHandle BigTosunWaitHandle;
 
+	FTimerHandle AK74WaitHandle;
+	FTimerHandle MP5WaitHandle;
+
 	void SpawnTosun();
 	void SpawnBombTosun();
 	void SpawnBigTosun();
+
+	void SpawnAK74();
+	void SpawnMP5();
 
 	void PlayStarting();
 	void PlayMissionStart();

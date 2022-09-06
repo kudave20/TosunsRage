@@ -15,21 +15,11 @@ void ASurvivalGameMode::BeginPlay()
 	GetWorldTimerManager().SetTimer(BombTosunWaitHandle, this, &ASurvivalGameMode::SpawnBombTosun, 10, true, 3);
 	GetWorldTimerManager().SetTimer(BigTosunWaitHandle, this, &ASurvivalGameMode::SpawnBigTosun, 40, true, 40);
 
+	GetWorldTimerManager().SetTimer(AK74WaitHandle, this, &ASurvivalGameMode::SpawnAK74, 30, true, 30);
+	GetWorldTimerManager().SetTimer(MP5WaitHandle, this, &ASurvivalGameMode::SpawnMP5, 30, true, 30);
+
 	VictoryAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), VictoryMusic);
 	FailedAudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), FailedMusic);
-
-	TosunSpawnPoints.Emplace(FVector(-221, 555, 691));
-	TosunSpawnPoints.Emplace(FVector(-1270, 150, 691));
-	TosunSpawnPoints.Emplace(FVector(-380, -210, 691));
-
-	BombTosunSpawnPoints.Emplace(FVector(-220, -670, 691));
-	BombTosunSpawnPoints.Emplace(FVector(220, 260, 691));
-	BombTosunSpawnPoints.Emplace(FVector(-1350, 680, 691));
-}
-
-void ASurvivalGameMode::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void ASurvivalGameMode::SetVictoryMusic(bool bIsPlaying)
@@ -79,7 +69,17 @@ void ASurvivalGameMode::SpawnTosun()
 	APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (Pawn == nullptr) return;
 
-	while ((Pawn->GetActorLocation() - SpawnPoints[RandomInt]).Size() <= 500)
+	FVector PawnLocation = Pawn->GetActorLocation();
+
+	if (PawnLocation.Z < 488)
+	{
+		for (FVector SpawnPoint : SpawnPoints)
+		{
+			SpawnPoint.Z = 256;
+		}
+	}
+
+	while ((PawnLocation - SpawnPoints[RandomInt]).Size() <= 500)
 	{
 		SpawnPoints.RemoveAt(RandomInt);
 
@@ -93,7 +93,8 @@ void ASurvivalGameMode::SpawnTosun()
 
 	GetWorld()->SpawnActor<AActor>(Tosun, Location, Rotation);
 
-	Location.Z = 256;
+	if (PawnLocation.Z < 488) Location.Z = 691;
+	else Location.Z = 256;
 
 	GetWorld()->SpawnActor<AActor>(Tosun, Location, Rotation);
 }
@@ -112,7 +113,17 @@ void ASurvivalGameMode::SpawnBombTosun()
 	APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (Pawn == nullptr) return;
 
-	while ((Pawn->GetActorLocation() - SpawnPoints[RandomInt]).Size() <= 500)
+	FVector PawnLocation = Pawn->GetActorLocation();
+
+	if (PawnLocation.Z < 488)
+	{
+		for (FVector SpawnPoint : SpawnPoints)
+		{
+			SpawnPoint.Z = 256;
+		}
+	}
+
+	while ((PawnLocation - SpawnPoints[RandomInt]).Size() <= 500)
 	{
 		SpawnPoints.RemoveAt(RandomInt);
 
@@ -126,7 +137,8 @@ void ASurvivalGameMode::SpawnBombTosun()
 
 	GetWorld()->SpawnActor<AActor>(BombTosun, Location, Rotation);
 
-	Location.Z = 256;
+	if (PawnLocation.Z < 488) Location.Z = 691;
+	else Location.Z = 256;
 
 	GetWorld()->SpawnActor<AActor>(BombTosun, Location, Rotation);
 }
@@ -145,7 +157,17 @@ void ASurvivalGameMode::SpawnBigTosun()
 	APawn* Pawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (Pawn == nullptr) return;
 
-	while ((Pawn->GetActorLocation() - SpawnPoints[RandomInt]).Size() <= 500)
+	FVector PawnLocation = Pawn->GetActorLocation();
+
+	if (PawnLocation.Z < 488)
+	{
+		for (FVector SpawnPoint : SpawnPoints)
+		{
+			SpawnPoint.Z = 256;
+		}
+	}
+
+	while ((PawnLocation - SpawnPoints[RandomInt]).Size() <= 500)
 	{
 		SpawnPoints.RemoveAt(RandomInt);
 
@@ -159,9 +181,38 @@ void ASurvivalGameMode::SpawnBigTosun()
 
 	GetWorld()->SpawnActor<AActor>(BigTosun, Location, Rotation);
 
-	Location.Z = 256;
+	if (PawnLocation.Z < 488) Location.Z = 691;
+	else Location.Z = 256;
 
 	GetWorld()->SpawnActor<AActor>(BigTosun, Location, Rotation);
+}
+
+void ASurvivalGameMode::SpawnAK74()
+{
+	if (AK74SpawnPoints.Num() == 0) return;
+
+	int32 RandomInt = FMath::RandRange(0, AK74SpawnPoints.Num() - 1);
+
+	FVector Location = AK74SpawnPoints[RandomInt];
+	FRotator Rotation;
+
+	GetWorld()->SpawnActor<AActor>(AK74PickUp, Location, Rotation);
+
+	AK74SpawnPoints.RemoveAt(RandomInt);
+}
+
+void ASurvivalGameMode::SpawnMP5()
+{
+	if (MP5SpawnPoints.Num() == 0) return;
+
+	int32 RandomInt = FMath::RandRange(0, MP5SpawnPoints.Num() - 1);
+
+	FVector Location = MP5SpawnPoints[RandomInt];
+	FRotator Rotation;
+
+	GetWorld()->SpawnActor<AActor>(MP5PickUp, Location, Rotation);
+
+	MP5SpawnPoints.RemoveAt(RandomInt);
 }
 
 void ASurvivalGameMode::PlayStarting()
