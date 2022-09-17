@@ -34,24 +34,7 @@ void UGameOverWidget::SetButtonVisible()
 
 void UGameOverWidget::RetryOnRelease()
 {
-	APlayerController* PlayerController = GetOwningPlayer();
-
-	if (PlayerController == nullptr) return;
-
-	FadeWidget = CreateWidget(PlayerController, FadeWidgetClass);
-
-	if (FadeWidget != nullptr)
-	{
-		FadeWidget->AddToViewport();
-
-		UFadeWidget* Widget = Cast<UFadeWidget>(FadeWidget);
-
-		if (Widget != nullptr) Widget->FadeOut();
-	}
-
-	ASurvivalGameMode* SurvivalGameMode = GetWorld()->GetAuthGameMode<ASurvivalGameMode>();
-	
-	if (SurvivalGameMode != nullptr) SurvivalGameMode->SetFailedMusic(false);
+	GameOverSet();
 
 	FLatentActionInfo LatentInfo;
 	LatentInfo.CallbackTarget = this;
@@ -64,24 +47,7 @@ void UGameOverWidget::RetryOnRelease()
 
 void UGameOverWidget::MainMenuOnRelease()
 {
-	APlayerController* PlayerController = GetOwningPlayer();
-
-	if (PlayerController == nullptr) return;
-
-	FadeWidget = CreateWidget(PlayerController, FadeWidgetClass);
-
-	if (FadeWidget != nullptr)
-	{
-		FadeWidget->AddToViewport();
-
-		UFadeWidget* Widget = Cast<UFadeWidget>(FadeWidget);
-
-		if (Widget != nullptr) Widget->FadeOut();
-	}
-
-	ASurvivalGameMode* SurvivalGameMode = GetWorld()->GetAuthGameMode<ASurvivalGameMode>();
-
-	if (SurvivalGameMode != nullptr) SurvivalGameMode->SetFailedMusic(false);
+	GameOverSet();
 
 	FLatentActionInfo LatentInfo;
 	LatentInfo.CallbackTarget = this;
@@ -101,9 +67,31 @@ void UGameOverWidget::LevelRetry()
 	if (PlayerController != nullptr) PlayerController->RestartLevel();
 }
 
-void UGameOverWidget::ToMainMenu()
+void UGameOverWidget::OpenMainMenu()
 {
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("MainMenu"));
+}
+
+void UGameOverWidget::GameOverSet()
+{
+	APlayerController* PlayerController = GetOwningPlayer();
+
+	if (PlayerController == nullptr) return;
+
+	FadeWidget = CreateWidget(PlayerController, FadeWidgetClass);
+
+	if (FadeWidget != nullptr)
+	{
+		FadeWidget->AddToViewport();
+
+		UFadeWidget* Widget = Cast<UFadeWidget>(FadeWidget);
+
+		if (Widget != nullptr) Widget->FadeOut();
+	}
+
+	ASurvivalGameMode* SurvivalGameMode = GetWorld()->GetAuthGameMode<ASurvivalGameMode>();
+
+	if (SurvivalGameMode != nullptr) SurvivalGameMode->SetFailedMusic(false);
 }
 
 void UGameOverWidget::RadioChat(USoundBase* SoundBase)

@@ -4,28 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "GameOverWidget.generated.h"
+#include "HouseVictoryWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TOSUNSRAGE_API UGameOverWidget : public UUserWidget
+class TOSUNSRAGE_API UHouseVictoryWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 protected:
 	virtual void NativeConstruct() override;
 
 private:
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
-	UWidgetAnimation* GameOverEffect;
+	UWidgetAnimation* Victory;
+	
+	UPROPERTY(meta = (BindWidget))
+	class UButton* MainMenu;
 
 	UPROPERTY(meta = (BindWidget))
-	class UButton* Retry;
-
-	UPROPERTY(meta = (BindWidget))
-	UButton* MainMenu;
+	UButton* Next;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> FadeWidgetClass;
@@ -33,25 +33,14 @@ private:
 	UPROPERTY()
 	UUserWidget* FadeWidget;
 
-	UPROPERTY(EditDefaultsOnly)
-	USoundBase* RetrySound;
-
-	UFUNCTION()
-	void SetButtonVisible();
-
-	UFUNCTION()
-	void RetryOnRelease();
-
 	UFUNCTION()
 	void MainMenuOnRelease();
 
 	UFUNCTION()
-	void LevelRetry();
+	void NextOnRelease();
 
 	UFUNCTION()
 	void OpenMainMenu();
-
-	void GameOverSet();
-
-	void RadioChat(USoundBase* SoundBase);
+	
+	void VictorySet();
 };
