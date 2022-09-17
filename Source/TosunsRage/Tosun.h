@@ -13,7 +13,18 @@ UCLASS()
 class TOSUNSRAGE_API ATosun : public AEnemy
 {
 	GENERATED_BODY()
+
+protected:
+	virtual void BeginPlay() override;
 	
 public:
 	virtual void Attack() override;
+
+	void AttackStart();
+	void AttackEnd();
+
+private:
+	FBodyInstance* RForeArm;
+
+	FVector AttackStartPosition;
 };

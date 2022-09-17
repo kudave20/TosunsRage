@@ -10,20 +10,12 @@ void ABigTosun::Attack()
 	Super::Attack();
 
 	IsAttacking = true;
-
-	FVector Direction = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation() - GetActorLocation();
-	FVector Start = GetActorLocation();
-	FVector End = GetActorLocation() + Direction;
-
-	FTimerHandle WaitHandle;
-	FTimerDelegate TimerDelegate;
-	TimerDelegate.BindUFunction(this, FName("SplashAttack"), Direction);
-
-	GetWorldTimerManager().SetTimer(WaitHandle, TimerDelegate, 1.5f, false);
 }
 
-void ABigTosun::SplashAttack(FVector Direction)
+void ABigTosun::SplashAttack()
 {
+	FVector Direction = UGameplayStatics::GetPlayerPawn(GetWorld(), 0)->GetActorLocation() - GetActorLocation();
+
 	TArray<AActor*> ActorsToIgnore;
 	ActorsToIgnore.Add(this);
 
@@ -31,7 +23,7 @@ void ABigTosun::SplashAttack(FVector Direction)
 
 	bool bSuccess = UKismetSystemLibrary::SphereTraceMulti(GetWorld(), GetActorLocation(), GetActorLocation(), 300,
 		UEngineTypes::ConvertToTraceType(ECC_Camera), true, ActorsToIgnore,
-		EDrawDebugTrace::ForDuration, Hits, true);
+		EDrawDebugTrace::None, Hits, true);
 
 	if (bSuccess)
 	{
@@ -41,7 +33,7 @@ void ABigTosun::SplashAttack(FVector Direction)
 
 			if (Player != nullptr)
 			{
-				FPointDamageEvent DamageEvent(Damage, Hit, -Direction, nullptr);
+				FPointDamageEvent DamageEvent(Damage, Hit, Direction, nullptr);
 				Player->TakeDamage(Damage, DamageEvent, GetController(), this);
 			}
 		}

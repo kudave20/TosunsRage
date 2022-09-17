@@ -17,7 +17,5 @@ class TOSUNSRAGE_API ABigTosun : public AEnemy
 public:
 	virtual void Attack() override;
 
-private:
-	UFUNCTION()
-	void SplashAttack(FVector Direction);
+	void SplashAttack();
 };

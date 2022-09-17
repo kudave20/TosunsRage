@@ -33,7 +33,7 @@ void AEnemy::SphereTrace(FVector Direction, FVector Start, FVector End)
 
 	bool bSuccess = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 25,
 		UEngineTypes::ConvertToTraceType(ECC_Camera), true, ActorsToIgnore,
-		EDrawDebugTrace::ForDuration, Hit, true);
+		EDrawDebugTrace::None, Hit, true);
 
 	if (bSuccess)
 	{
@@ -41,7 +41,7 @@ void AEnemy::SphereTrace(FVector Direction, FVector Start, FVector End)
 
 		if (Player != nullptr)
 		{
-			FPointDamageEvent DamageEvent(Damage, Hit, -Direction, nullptr);
+			FPointDamageEvent DamageEvent(Damage, Hit, Direction, nullptr);
 			Player->TakeDamage(Damage, DamageEvent, GetController(), this);
 		}
 	}
@@ -50,6 +50,8 @@ void AEnemy::SphereTrace(FVector Direction, FVector Start, FVector End)
 void AEnemy::Die()
 {
 	DetachFromControllerPendingDestroy();
+
+	IsAttacking = false;
 
 	// Ragdoll
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
