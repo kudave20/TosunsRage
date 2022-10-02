@@ -10,6 +10,7 @@
 #include "PickUp.h"
 #include "Components/SpotLightComponent.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
+#include "ShooterPlayerController.h"
 
 // Sets default values
 AShooterCharacter::AShooterCharacter()
@@ -140,6 +141,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("EquipPrimary"), EInputEvent::IE_Pressed, this, &AShooterCharacter::EquipPrimary);
 	PlayerInputComponent->BindAction(TEXT("EquipSecondary"), EInputEvent::IE_Pressed, this, &AShooterCharacter::EquipSecondary);
 	PlayerInputComponent->BindAction(TEXT("ToggleFlash"), EInputEvent::IE_Pressed, this, &AShooterCharacter::ToggleFlash);
+	PlayerInputComponent->BindAction(TEXT("Pause"), EInputEvent::IE_Pressed, this, &AShooterCharacter::PauseGame);
 }
 
 float AShooterCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
@@ -581,4 +583,11 @@ void AShooterCharacter::ToggleFlash()
 {
 	if (Flash->IsVisible()) Flash->SetVisibility(false);
 	else Flash->SetVisibility(true);
+}
+
+void AShooterCharacter::PauseGame()
+{
+	AShooterPlayerController* PlayerController = Cast<AShooterPlayerController>(GetController());
+
+	if (PlayerController != nullptr) PlayerController->PauseGame();
 }

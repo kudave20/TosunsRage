@@ -1,38 +1,36 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GameOverWidget.h"
+#include "EscapeWidget.h"
 #include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
 #include "SurvivalGameMode.h"
 #include "FadeWidget.h"
-#include "Kismet/GameplayStatics.h"
 #include "Components/AudioComponent.h"
 
-void UGameOverWidget::NativeConstruct()
+void UEscapeWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	PlayAnimation(GameOverEffect);
+	PlayAnimation(Escape);
 
-	FLatentActionInfo LatentInfo;
-	LatentInfo.CallbackTarget = this;
-	LatentInfo.ExecutionFunction = "SetButtonVisible";
-	LatentInfo.UUID = 123;
-	LatentInfo.Linkage = 0;
-
-	UKismetSystemLibrary::Delay(GetWorld(), 2.5f, LatentInfo);
-
-	if (!Retry->OnReleased.IsBound()) Retry->OnReleased.AddDynamic(this, &UGameOverWidget::RetryOnRelease);
-	if (!MainMenu->OnReleased.IsBound()) MainMenu->OnReleased.AddDynamic(this, &UGameOverWidget::MainMenuOnRelease);
+	if (!Resume->OnReleased.IsBound()) Resume->OnReleased.AddDynamic(this, &UEscapeWidget::ResumeOnRelease);
+	if (!Retry->OnReleased.IsBound()) Retry->OnReleased.AddDynamic(this, &UEscapeWidget::RetryOnRelease);
+	if (!MainMenu->OnReleased.IsBound()) MainMenu->OnReleased.AddDynamic(this, &UEscapeWidget::MainMenuOnRelease);
 }
 
-void UGameOverWidget::SetButtonVisible()
+void UEscapeWidget::ResumeOnRelease()
 {
-	Retry->SetVisibility(ESlateVisibility::Visible);
-	MainMenu->SetVisibility(ESlateVisibility::Visible);
+	RemoveFromParent();
+
+	UGameplayStatics::SetGamePaused(GetWorld(), false);
+
+	APlayerController* PlayerController = GetOwningPlayer();
+
+	if (PlayerController != nullptr) PlayerController->SetShowMouseCursor(false);
 }
 
-void UGameOverWidget::RetryOnRelease()
+void UEscapeWidget::RetryOnRelease()
 {
 	GameOverSet();
 
@@ -45,7 +43,7 @@ void UGameOverWidget::RetryOnRelease()
 	UKismetSystemLibrary::Delay(GetWorld(), 3, LatentInfo);
 }
 
-void UGameOverWidget::MainMenuOnRelease()
+void UEscapeWidget::MainMenuOnRelease()
 {
 	GameOverSet();
 
@@ -58,7 +56,7 @@ void UGameOverWidget::MainMenuOnRelease()
 	UKismetSystemLibrary::Delay(GetWorld(), 5, LatentInfo);
 }
 
-void UGameOverWidget::LevelRetry()
+void UEscapeWidget::LevelRetry()
 {
 	RadioChat(RetrySound);
 
@@ -67,12 +65,12 @@ void UGameOverWidget::LevelRetry()
 	if (PlayerController != nullptr) PlayerController->RestartLevel();
 }
 
-void UGameOverWidget::OpenMainMenu()
+void UEscapeWidget::OpenMainMenu()
 {
 	UGameplayStatics::OpenLevel(GetWorld(), TEXT("MainMenu"));
 }
 
-void UGameOverWidget::GameOverSet()
+void UEscapeWidget::GameOverSet()
 {
 	APlayerController* PlayerController = GetOwningPlayer();
 
@@ -94,7 +92,7 @@ void UGameOverWidget::GameOverSet()
 	if (SurvivalGameMode != nullptr) SurvivalGameMode->SetFailedMusic(false);
 }
 
-void UGameOverWidget::RadioChat(USoundBase* SoundBase)
+void UEscapeWidget::RadioChat(USoundBase* SoundBase)
 {
 	UAudioComponent* AudioComponent = UGameplayStatics::CreateSound2D(GetWorld(), SoundBase);
 

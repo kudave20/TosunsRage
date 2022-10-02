@@ -166,4 +166,6 @@ private:
 	void UnEquip();
 
 	void ToggleFlash();
+
+	void PauseGame();
 };

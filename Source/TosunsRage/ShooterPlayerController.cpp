@@ -56,6 +56,17 @@ void AShooterPlayerController::GameHasEnded(class AActor* EndGameFocus, bool bIs
 	}
 }
 
+void AShooterPlayerController::PauseGame()
+{
+	EscapeWidget = CreateWidget(this, EscapeWidgetClass);
+
+	if (EscapeWidget != nullptr) EscapeWidget->AddToViewport();
+
+	SetShowMouseCursor(true);
+
+	UGameplayStatics::SetGamePaused(GetWorld(), true);
+}
+
 void AShooterPlayerController::VictorySet()
 {
 	VictoryWidget = CreateWidget(this, VictoryWidgetClass);

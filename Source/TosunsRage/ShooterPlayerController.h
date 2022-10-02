@@ -20,6 +20,8 @@ protected:
 public:
 	virtual void GameHasEnded(class AActor* EndGameFocus = nullptr, bool bIsWinner = false) override;
 
+	void PauseGame();
+
 private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UUserWidget> HUDClass;
@@ -50,6 +52,12 @@ private:
 
 	UPROPERTY()
 	UUserWidget* TimerWidget;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UUserWidget> EscapeWidgetClass;
+
+	UPROPERTY()
+	UUserWidget* EscapeWidget;
 
 	UPROPERTY(EditAnywhere)
 	USoundBase* MissionAccomplishedSound;
