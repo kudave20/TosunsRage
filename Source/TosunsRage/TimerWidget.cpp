@@ -11,9 +11,18 @@ void UTimerWidget::NativeConstruct()
 
 	FTimerHandle WaitHandle;
 	GetWorld()->GetTimerManager().SetTimer(WaitHandle, this, &UTimerWidget::SetCurrentTimer, 1, true);
+}
 
-	Minute->TextDelegate.BindUFunction(this, "SetMinute");
-	Second->TextDelegate.BindUFunction(this, "SetSecond");
+bool UTimerWidget::Initialize()
+{
+	bool Success = Super::Initialize();
+
+	if (!Success) return false;
+
+	if (Minute != nullptr) Minute->TextDelegate.BindUFunction(this, "SetMinute");
+	if (Second != nullptr) Second->TextDelegate.BindUFunction(this, "SetSecond");
+
+	return true;
 }
 
 void UTimerWidget::SetCurrentTimer()

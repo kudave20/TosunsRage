@@ -18,10 +18,19 @@ void UHUDWidget::NativeConstruct()
 
 	FTimerHandle HideWaitHandle;
 	GetWorld()->GetTimerManager().SetTimer(HideWaitHandle, this, &UHUDWidget::Hide, 0.01f, true);
+}
 
-	Health->TextDelegate.BindUFunction(this, "SetHealth");
-	MaxAmmo->TextDelegate.BindUFunction(this, "SetMaxAmmo");
-	Ammo->TextDelegate.BindUFunction(this, "SetAmmo");
+bool UHUDWidget::Initialize()
+{
+	bool Success = Super::Initialize();
+
+	if (!Success) return false;
+
+	if (Health != nullptr) Health->TextDelegate.BindUFunction(this, "SetHealth");
+	if (MaxAmmo != nullptr) MaxAmmo->TextDelegate.BindUFunction(this, "SetMaxAmmo");
+	if (Ammo != nullptr) Ammo->TextDelegate.BindUFunction(this, "SetAmmo");
+
+	return true;
 }
 
 void UHUDWidget::SetCrossHair()

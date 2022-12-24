@@ -16,6 +16,9 @@ class TOSUNSRAGE_API UHUDWidget : public UUserWidget
 
 protected:
 	virtual void NativeConstruct() override;
+
+public:
+	virtual bool Initialize() override;
 	
 private:
 	UPROPERTY(meta = (BindWidget))

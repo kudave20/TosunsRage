@@ -17,6 +17,9 @@ class TOSUNSRAGE_API UTimerWidget : public UUserWidget
 protected:
 	virtual void NativeConstruct() override;
 
+public:
+	virtual bool Initialize() override;
+
 private:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* Minute;

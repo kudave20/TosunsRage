@@ -20,9 +20,18 @@ void UDeployWidget::NativeConstruct()
 
 	FTimerHandle TimerWaitHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerWaitHandle, this, &UDeployWidget::SetDeployTimer, 0.01f, true);
+}
 
-	Second->TextDelegate.BindUFunction(this, "SetSecond");
-	Millisecond->TextDelegate.BindUFunction(this, "SetMillisecond");
+bool UDeployWidget::Initialize()
+{
+	bool Success = Super::Initialize();
+
+	if (!Success) return false;
+
+	if (Second != nullptr) Second->TextDelegate.BindUFunction(this, "SetSecond");
+	if (Millisecond != nullptr) Millisecond->TextDelegate.BindUFunction(this, "SetMillisecond");
+
+	return true;
 }
 
 void UDeployWidget::SetTipVisible()
